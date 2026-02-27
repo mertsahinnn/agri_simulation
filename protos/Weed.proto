@@ -1,0 +1,114 @@
+#VRML_SIM R2025a utf8
+# license: Apache License 2.0
+# A weed plant for the agricultural simulation.
+# Visually distinct from crops: shorter, wider, darker green with reddish tint.
+# Has a different recognition color for AI detection.
+
+PROTO Weed [
+  field SFVec3f    translation    0 0 0
+  field SFRotation rotation       0 0 1 0
+  field SFFloat    height         0.2
+  field SFColor    baseColor      0.35 0.5 0.1
+  field SFString   name           "weed"
+]
+{
+  Solid {
+    translation IS translation
+    rotation IS rotation
+    children [
+      # ===== CENTRAL CLUSTER =====
+      DEF WEED_CENTER Pose {
+        translation 0 0 0.04
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor IS baseColor
+              metalness 0
+              roughness 0.95
+            }
+            geometry Sphere {
+              radius 0.05
+              subdivision 2
+            }
+          }
+        ]
+      }
+
+      # ===== SPREADING LEAF 1 =====
+      Pose {
+        translation 0.06 0 0.02
+        rotation 0 0 1 0.3
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.4 0.52 0.08
+              metalness 0
+              roughness 0.92
+            }
+            geometry Box {
+              size 0.12 0.06 0.006
+            }
+          }
+        ]
+      }
+
+      # ===== SPREADING LEAF 2 =====
+      Pose {
+        translation -0.05 0.04 0.02
+        rotation 0 0 1 2.1
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.38 0.48 0.1
+              metalness 0
+              roughness 0.92
+            }
+            geometry Box {
+              size 0.11 0.05 0.006
+            }
+          }
+        ]
+      }
+
+      # ===== SPREADING LEAF 3 =====
+      Pose {
+        translation -0.03 -0.05 0.02
+        rotation 0 0 1 -1.5
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.42 0.5 0.09
+              metalness 0
+              roughness 0.92
+            }
+            geometry Box {
+              size 0.1 0.055 0.006
+            }
+          }
+        ]
+      }
+
+      # ===== SHORT STEM =====
+      Pose {
+        translation 0 0 0.01
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.3 0.4 0.08
+              metalness 0
+              roughness 0.9
+            }
+            geometry Cylinder {
+              height 0.04
+              radius 0.01
+            }
+          }
+        ]
+      }
+    ]
+    name IS name
+    recognitionColors [
+      0.35 0.5 0.1
+    ]
+  }
+}

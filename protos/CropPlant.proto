@@ -1,0 +1,128 @@
+#VRML_SIM R2025a utf8
+# license: Apache License 2.0
+# A realistic crop plant (e.g. corn/maize) for the agricultural simulation.
+# Each plant has a stem, leaves, and recognition color for AI detection.
+
+PROTO CropPlant [
+  field SFVec3f    translation    0 0 0
+  field SFRotation rotation       0 0 1 0
+  field SFFloat    height         0.4
+  field SFColor    stemColor      0.25 0.55 0.12
+  field SFColor    leafColor      0.2 0.6 0.15
+  field SFString   name           "crop"
+]
+{
+  Solid {
+    translation IS translation
+    rotation IS rotation
+    children [
+      # ===== MAIN STEM =====
+      DEF STEM Pose {
+        translation 0 0 0.15
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor IS stemColor
+              metalness 0
+              roughness 0.85
+            }
+            geometry Cylinder {
+              height 0.3
+              radius 0.012
+            }
+          }
+        ]
+      }
+
+      # ===== LOWER LEAF PAIR =====
+      Pose {
+        translation 0 0 0.1
+        rotation 0 0 1 0.4
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor IS leafColor
+              metalness 0
+              roughness 0.9
+            }
+            geometry Box {
+              size 0.18 0.04 0.008
+            }
+          }
+        ]
+      }
+      Pose {
+        translation 0 0 0.1
+        rotation 0 0 1 -0.4
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor IS leafColor
+              metalness 0
+              roughness 0.9
+            }
+            geometry Box {
+              size 0.18 0.04 0.008
+            }
+          }
+        ]
+      }
+
+      # ===== UPPER LEAF PAIR =====
+      Pose {
+        translation 0 0 0.22
+        rotation 0 0 1 1.2
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.22 0.62 0.18
+              metalness 0
+              roughness 0.9
+            }
+            geometry Box {
+              size 0.15 0.035 0.006
+            }
+          }
+        ]
+      }
+      Pose {
+        translation 0 0 0.22
+        rotation 0 0 1 -1.2
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.22 0.62 0.18
+              metalness 0
+              roughness 0.9
+            }
+            geometry Box {
+              size 0.15 0.035 0.006
+            }
+          }
+        ]
+      }
+
+      # ===== TOP LEAF =====
+      Pose {
+        translation 0 0 0.3
+        rotation 0 0 1 0
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.18 0.58 0.12
+              metalness 0
+              roughness 0.85
+            }
+            geometry Box {
+              size 0.03 0.12 0.005
+            }
+          }
+        ]
+      }
+    ]
+    name IS name
+    recognitionColors [
+      0.2 0.6 0.15
+    ]
+  }
+}

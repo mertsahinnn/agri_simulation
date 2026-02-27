@@ -1,0 +1,434 @@
+#VRML_SIM R2025a utf8
+# license: Apache License 2.0
+# A 4-nozzle boom sprayer implement to be attached to a Tractor's sensorSlot.
+# It consists of a liquid tank, a connecting arm, a horizontal boom, and 4 spray nozzles.
+
+PROTO Sprayer [
+  field SFVec3f    translation    -1.8 0 0.35
+  field SFRotation rotation       0 0 1 0
+  field SFColor    tankColor      0.25 0.42 0.68
+  field SFColor    boomColor      0.35 0.35 0.35
+  field SFColor    nozzleColor    0.8 0.1 0.1
+]
+{
+  Pose {
+    translation IS translation
+    rotation IS rotation
+    children [
+      # ===== CONNECTING ARM (Tractor to Tank) =====
+      DEF CONNECTING_ARM Pose {
+        translation 0.3 0 -0.05
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.2 0.2 0.2
+              metalness 0.8
+              roughness 0.4
+            }
+            geometry Box {
+              size 0.6 0.08 0.08
+            }
+          }
+        ]
+      }
+
+      # ===== LIQUID TANK =====
+      DEF TANK Pose {
+        translation 0 0 0.05
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor IS tankColor
+              metalness 0.1
+              roughness 0.6
+            }
+            geometry Box {
+              size 0.7 0.5 0.4
+            }
+          }
+          # Tank cap
+          Pose {
+            translation 0 0 0.22
+            children [
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.15 0.15 0.15
+                  metalness 0.3
+                  roughness 0.5
+                }
+                geometry Cylinder {
+                  height 0.05
+                  radius 0.06
+                }
+              }
+            ]
+          }
+        ]
+      }
+
+      # ===== TANK SUPPORT FRAME =====
+      DEF TANK_FRAME_LEFT Pose {
+        translation 0 -0.28 -0.1
+        children [
+          Shape {
+            appearance DEF FRAME_METAL PBRAppearance {
+              baseColor 0.15 0.15 0.15
+              metalness 0.9
+              roughness 0.3
+            }
+            geometry Box {
+              size 0.72 0.04 0.04
+            }
+          }
+        ]
+      }
+      DEF TANK_FRAME_RIGHT Pose {
+        translation 0 0.28 -0.1
+        children [
+          Shape {
+            appearance USE FRAME_METAL
+            geometry Box {
+              size 0.72 0.04 0.04
+            }
+          }
+        ]
+      }
+
+      # ===== BOOM (Horizontal Spray Bar) =====
+      DEF BOOM Pose {
+        translation -0.1 0 -0.15
+        children [
+          # Main horizontal boom bar
+          Shape {
+            appearance PBRAppearance {
+              baseColor IS boomColor
+              metalness 0.7
+              roughness 0.4
+            }
+            geometry Box {
+              size 0.06 2.4 0.06
+            }
+          }
+          # Boom center bracket
+          Pose {
+            translation 0.05 0 0.04
+            children [
+              Shape {
+                appearance USE FRAME_METAL
+                geometry Box {
+                  size 0.08 0.12 0.08
+                }
+              }
+            ]
+          }
+
+          # ===== NOZZLE 1 (Far Left) =====
+          DEF NOZZLE_1 Pose {
+            translation 0 -0.9 0
+            children [
+              # Nozzle pipe
+              Pose {
+                translation 0 0 -0.06
+                children [
+                  Shape {
+                    appearance PBRAppearance {
+                      baseColor IS nozzleColor
+                      metalness 0.5
+                      roughness 0.3
+                    }
+                    geometry Cylinder {
+                      height 0.1
+                      radius 0.02
+                    }
+                  }
+                ]
+              }
+              # Nozzle tip
+              Pose {
+                translation 0 0 -0.13
+                children [
+                  Shape {
+                    appearance PBRAppearance {
+                      baseColor 0.9 0.2 0.1
+                      metalness 0.3
+                      roughness 0.5
+                    }
+                    geometry Cone {
+                      bottomRadius 0.035
+                      height 0.04
+                    }
+                  }
+                ]
+              }
+              # Spray indicator light
+              DEF SPRAY_LIGHT_1 PointLight {
+                attenuation 0 0 1
+                color 0.2 0.8 0.2
+                intensity 0
+                location 0 0 -0.18
+                radius 0.5
+              }
+              # Spray cone visual (visible when spraying)
+              DEF SPRAY_VISUAL_1 Pose {
+                translation 0 0 -0.35
+                children [
+                  Shape {
+                    appearance PBRAppearance {
+                      baseColor 0.3 0.7 1.0
+                      transparency 0.7
+                      metalness 0
+                      roughness 1
+                    }
+                    geometry Cone {
+                      bottomRadius 0.15
+                      height 0.4
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+
+          # ===== NOZZLE 2 (Center Left) =====
+          DEF NOZZLE_2 Pose {
+            translation 0 -0.3 0
+            children [
+              Pose {
+                translation 0 0 -0.06
+                children [
+                  Shape {
+                    appearance PBRAppearance {
+                      baseColor IS nozzleColor
+                      metalness 0.5
+                      roughness 0.3
+                    }
+                    geometry Cylinder {
+                      height 0.1
+                      radius 0.02
+                    }
+                  }
+                ]
+              }
+              Pose {
+                translation 0 0 -0.13
+                children [
+                  Shape {
+                    appearance PBRAppearance {
+                      baseColor 0.9 0.2 0.1
+                      metalness 0.3
+                      roughness 0.5
+                    }
+                    geometry Cone {
+                      bottomRadius 0.035
+                      height 0.04
+                    }
+                  }
+                ]
+              }
+              DEF SPRAY_LIGHT_2 PointLight {
+                attenuation 0 0 1
+                color 0.2 0.8 0.2
+                intensity 0
+                location 0 0 -0.18
+                radius 0.5
+              }
+              DEF SPRAY_VISUAL_2 Pose {
+                translation 0 0 -0.35
+                children [
+                  Shape {
+                    appearance PBRAppearance {
+                      baseColor 0.3 0.7 1.0
+                      transparency 0.7
+                      metalness 0
+                      roughness 1
+                    }
+                    geometry Cone {
+                      bottomRadius 0.15
+                      height 0.4
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+
+          # ===== NOZZLE 3 (Center Right) =====
+          DEF NOZZLE_3 Pose {
+            translation 0 0.3 0
+            children [
+              Pose {
+                translation 0 0 -0.06
+                children [
+                  Shape {
+                    appearance PBRAppearance {
+                      baseColor IS nozzleColor
+                      metalness 0.5
+                      roughness 0.3
+                    }
+                    geometry Cylinder {
+                      height 0.1
+                      radius 0.02
+                    }
+                  }
+                ]
+              }
+              Pose {
+                translation 0 0 -0.13
+                children [
+                  Shape {
+                    appearance PBRAppearance {
+                      baseColor 0.9 0.2 0.1
+                      metalness 0.3
+                      roughness 0.5
+                    }
+                    geometry Cone {
+                      bottomRadius 0.035
+                      height 0.04
+                    }
+                  }
+                ]
+              }
+              DEF SPRAY_LIGHT_3 PointLight {
+                attenuation 0 0 1
+                color 0.2 0.8 0.2
+                intensity 0
+                location 0 0 -0.18
+                radius 0.5
+              }
+              DEF SPRAY_VISUAL_3 Pose {
+                translation 0 0 -0.35
+                children [
+                  Shape {
+                    appearance PBRAppearance {
+                      baseColor 0.3 0.7 1.0
+                      transparency 0.7
+                      metalness 0
+                      roughness 1
+                    }
+                    geometry Cone {
+                      bottomRadius 0.15
+                      height 0.4
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+
+          # ===== NOZZLE 4 (Far Right) =====
+          DEF NOZZLE_4 Pose {
+            translation 0 0.9 0
+            children [
+              Pose {
+                translation 0 0 -0.06
+                children [
+                  Shape {
+                    appearance PBRAppearance {
+                      baseColor IS nozzleColor
+                      metalness 0.5
+                      roughness 0.3
+                    }
+                    geometry Cylinder {
+                      height 0.1
+                      radius 0.02
+                    }
+                  }
+                ]
+              }
+              Pose {
+                translation 0 0 -0.13
+                children [
+                  Shape {
+                    appearance PBRAppearance {
+                      baseColor 0.9 0.2 0.1
+                      metalness 0.3
+                      roughness 0.5
+                    }
+                    geometry Cone {
+                      bottomRadius 0.035
+                      height 0.04
+                    }
+                  }
+                ]
+              }
+              DEF SPRAY_LIGHT_4 PointLight {
+                attenuation 0 0 1
+                color 0.2 0.8 0.2
+                intensity 0
+                location 0 0 -0.18
+                radius 0.5
+              }
+              DEF SPRAY_VISUAL_4 Pose {
+                translation 0 0 -0.35
+                children [
+                  Shape {
+                    appearance PBRAppearance {
+                      baseColor 0.3 0.7 1.0
+                      transparency 0.7
+                      metalness 0
+                      roughness 1
+                    }
+                    geometry Cone {
+                      bottomRadius 0.15
+                      height 0.4
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+
+          # ===== BOOM HOSE CONNECTORS =====
+          DEF HOSE_1 Pose {
+            translation 0 -0.9 0.06
+            children [
+              Shape {
+                appearance USE FRAME_METAL
+                geometry Cylinder {
+                  height 0.08
+                  radius 0.015
+                }
+              }
+            ]
+          }
+          DEF HOSE_2 Pose {
+            translation 0 -0.3 0.06
+            children [
+              Shape {
+                appearance USE FRAME_METAL
+                geometry Cylinder {
+                  height 0.08
+                  radius 0.015
+                }
+              }
+            ]
+          }
+          DEF HOSE_3 Pose {
+            translation 0 0.3 0.06
+            children [
+              Shape {
+                appearance USE FRAME_METAL
+                geometry Cylinder {
+                  height 0.08
+                  radius 0.015
+                }
+              }
+            ]
+          }
+          DEF HOSE_4 Pose {
+            translation 0 0.9 0.06
+            children [
+              Shape {
+                appearance USE FRAME_METAL
+                geometry Cylinder {
+                  height 0.08
+                  radius 0.015
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

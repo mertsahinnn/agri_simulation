@@ -1,0 +1,21 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Agricultural Spraying Simulation — Bağımlılıklar
+# ═══════════════════════════════════════════════════════════════════════
+# Temel (Webots simülasyonu için):
+#   Webots'un kendi Python modülleri otomatik sağlanır (controller, vehicle)
+#
+# AI / YOLO tespiti için:
+#   pip install -r requirements.txt
+# ═══════════════════════════════════════════════════════════════════════
+
+# ── YOLO Modeli ───────────────────────────────────────────────────────
+ultralytics>=8.0.0       # YOLOv8/YOLO11 inference engine
+
+# ── Görüntü İşleme ───────────────────────────────────────────────────
+opencv-python>=4.8.0     # Video okuma, frame işleme, bbox çizimi
+Pillow>=10.0.0           # OpenCV → Tkinter dönüşümü için gerekli
+numpy>=1.24.0            # Sayısal hesaplamalar
+
+# ── Not ───────────────────────────────────────────────────────────────
+# ultralytics otomatik olarak torch/torchvision indirir
+# GPU desteği için: pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121

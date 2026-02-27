@@ -1,0 +1,223 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/vehicles/protos/generic/Tractor.proto"
+EXTERNPROTO "../protos/SandyGround.proto"
+EXTERNPROTO "../protos/Sprayer.proto"
+
+WorldInfo {
+  title "Agricultural Spraying Simulation"
+  basicTimeStep 10
+  contactProperties [
+    ContactProperties {
+      material2 "tractor"
+      coulombFriction [
+        2
+      ]
+    }
+  ]
+}
+Viewpoint {
+  orientation -0.08765416515577418 0.9770975768107276 -0.19389964600650658 1.0310684997458863
+  position -44.73804052242666 -8.750235283950344 53.42025679121834
+  follow "vehicle"
+}
+Robot {
+  children [
+    Emitter {
+      channel 1
+    }
+  ]
+  name "spray_supervisor"
+  controller "spray_supervisor"
+  supervisor TRUE
+}
+TexturedBackground {
+  texture "noon_cloudy_countryside"
+}
+TexturedBackgroundLight {
+  texture "noon_cloudy_countryside"
+}
+DEF FARMLAND Solid {
+  children [
+    DEF GROUND_SHAPE Shape {
+      appearance SandyGround {
+        colorOverride 0.55 0.4 0.25
+        textureTransform TextureTransform {
+          scale 25 50
+        }
+      }
+      geometry Plane {
+        size 50 100
+      }
+    }
+  ]
+  name "farmland"
+  boundingObject USE GROUND_SHAPE
+}
+DEF CROP_ROW_1 Pose {
+  translation 0 -20 0.15
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.2 0.55 0.15
+        roughness 0.8
+        metalness 0
+      }
+      geometry Box {
+        size 40 0.3 0.3
+      }
+    }
+  ]
+}
+DEF CROP_ROW_2 Pose {
+  translation 0 -16 0.15
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.18 0.5 0.12
+        roughness 0.85
+        metalness 0
+      }
+      geometry Box {
+        size 40 0.3 0.3
+      }
+    }
+  ]
+}
+DEF CROP_ROW_3 Pose {
+  translation 0 -12 0.15
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.22 0.58 0.14
+        roughness 0.78
+        metalness 0
+      }
+      geometry Box {
+        size 40 0.3 0.3
+      }
+    }
+  ]
+}
+DEF CROP_ROW_4 Pose {
+  translation 0 -8 0.15
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.2 0.52 0.13
+        roughness 0.82
+        metalness 0
+      }
+      geometry Box {
+        size 40 0.3 0.3
+      }
+    }
+  ]
+}
+DEF CROP_ROW_5 Pose {
+  translation 0 -4 0.15
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.19 0.56 0.16
+        roughness 0.8
+        metalness 0
+      }
+      geometry Box {
+        size 40 0.3 0.3
+      }
+    }
+  ]
+}
+DEF CROP_ROW_6 Pose {
+  translation 0 0 0.15
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.21 0.54 0.14
+        roughness 0.83
+        metalness 0
+      }
+      geometry Box {
+        size 40 0.3 0.3
+      }
+    }
+  ]
+}
+DEF CROP_ROW_7 Pose {
+  translation 0 4 0.15
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.2 0.57 0.15
+        roughness 0.79
+        metalness 0
+      }
+      geometry Box {
+        size 40 0.3 0.3
+      }
+    }
+  ]
+}
+DEF CROP_ROW_8 Pose {
+  translation 0 8 0.15
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.23 0.53 0.12
+        roughness 0.81
+        metalness 0
+      }
+      geometry Box {
+        size 40 0.3 0.3
+      }
+    }
+  ]
+}
+DEF CROP_ROW_9 Pose {
+  translation 0 12 0.15
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.2 0.55 0.15
+        roughness 0.8
+        metalness 0
+      }
+      geometry Box {
+        size 40 0.3 0.3
+      }
+    }
+  ]
+}
+DEF CROP_ROW_10 Pose {
+  translation 0 16 0.15
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.18 0.52 0.13
+        roughness 0.84
+        metalness 0
+      }
+      geometry Box {
+        size 40 0.3 0.3
+      }
+    }
+  ]
+}
+Tractor {
+  translation -14.954659450652105 -20.00000003064883 0.4626024253948109
+  rotation 5.585449976717439e-07 0.9999999999998416 6.910351752272164e-08 0.10121826599634767
+  controller "tractor_sprayer_controller"
+  sensorSlot [
+    Receiver {
+      channel 1
+    }
+    Sprayer {
+    }
+  ]
+  recognitionColors [
+    0.666667 0 0
+  ]
+}
