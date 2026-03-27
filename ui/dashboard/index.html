@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agri-Simulation Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top left, #1e293b, #0f172a);
+            background-attachment: fixed;
+            color: #f8fafc;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        .glass-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+        }
+        .glass-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .glass-btn:active {
+            transform: scale(0.98);
+        }
+        input[type=range] {
+            accent-color: #10b981;
+        }
+        .progress-liquid {
+            position: relative;
+            overflow: hidden;
+            border-radius: 9999px;
+        }
+        .progress-liquid::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: translateX(-100%);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="glass-panel sticky top-0 z-50 px-8 py-4 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                <i data-lucide="tractor" class="text-white w-6 h-6"></i>
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight text-white">AgriSim <span class="font-normal text-emerald-400 opacity-90">Dashboard</span></h1>
+        </div>
+        <div class="flex items-center space-x-3">
+            <span id="conn-badge" class="px-4 py-1.5 rounded-full text-sm font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/30 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                Disconnected
+            </span>
+            <span id="ai-badge" class="px-4 py-1.5 rounded-full text-sm font-semibold bg-slate-800 text-slate-400 border border-slate-700">AI: MANUAL</span>
+            <span id="auto-badge" class="px-4 py-1.5 rounded-full text-sm font-semibold bg-slate-800 text-slate-400 border border-slate-700">AUTO: OFF</span>
+        </div>
+    </nav>
+
+    <main class="w-full max-w-[1920px] mx-auto p-4 lg:p-8 space-y-6">
+
+      <!-- ÜST BÖLÜM: Sol-Sağ Kolonlar -->
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+
+        <!-- L Sol Kolon: Telemetri & Tank -->
+        <div class="xl:col-span-4 space-y-6">
+            
+            <!-- Tank Seviyesi -->
+            <div class="glass-panel rounded-2xl p-6 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 opacity-10">
+                    <i data-lucide="droplet" class="w-24 h-24"></i>
+                </div>
+                <h2 class="text-slate-400 font-semibold text-sm tracking-wider uppercase mb-4 flex items-center gap-2">
+                    <i data-lucide="flask-conical" class="w-4 h-4 text-blue-400"></i> Chemical Tank Level
+                </h2>
+                <div class="flex items-end justify-between mb-2">
+                    <span class="text-4xl font-bold text-white tracking-tight" id="tank-val">1000<span class="text-xl text-slate-400 ml-1">L</span></span>
+                    <span class="text-sm text-slate-400" id="tank-max">/ 1000 L</span>
+                </div>
+                <div class="h-6 w-full bg-slate-800 rounded-full overflow-hidden shadow-inner border border-slate-700">
+                    <div id="tank-bar" class="h-full progress-liquid bg-gradient-to-r from-blue-600 to-cyan-400 shadow-[0_0_15px_rgba(56,189,248,0.5)] transition-all duration-300" style="width: 100%;"></div>
+                </div>
+                <p id="tank-warning" class="text-rose-400 text-sm font-semibold mt-3 flex items-center gap-1 hidden">
+                    <i data-lucide="alert-triangle" class="w-4 h-4"></i> TANK EMPTY! System Stopped.
+                </p>
+            </div>
+
+            <!-- Hız & Yön -->
+            <div class="glass-panel rounded-2xl p-6">
+                <h2 class="text-slate-400 font-semibold text-sm tracking-wider uppercase mb-6 flex items-center gap-2">
+                    <i data-lucide="gauge" class="w-4 h-4 text-emerald-400"></i> Traktör Telemetrisi
+                </h2>
+                
+                <div class="mb-6">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-sm font-medium text-slate-300">İleri Hız</span>
+                        <span class="text-sm font-mono text-emerald-400 bg-emerald-400/10 px-2 rounded" id="speed-val">0.0 km/h</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                        <div id="speed-bar" class="bg-emerald-500 h-full transition-all duration-300" style="width: 50%;"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-sm font-medium text-slate-300">Direksiyon Açısı</span>
+                        <span class="text-sm font-mono text-purple-400 bg-purple-400/10 px-2 rounded" id="steer-val">0.000 rad</span>
+                    </div>
+                    <!-- Direksiyon Göstergesi Merkezi UI -->
+                    <div class="w-full bg-slate-800 h-3 rounded-full relative border border-slate-700 overflow-hidden">
+                        <div class="absolute left-1/2 top-0 bottom-0 w-[2px] bg-slate-600 z-10"></div>
+                        <div id="steer-bar" class="absolute h-full bg-purple-500/80 transition-all duration-300" style="left: 50%; width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- İstatistikler -->
+            <div class="glass-panel rounded-2xl p-6">
+                 <h2 class="text-slate-400 font-semibold text-sm tracking-wider uppercase mb-4 flex items-center gap-2">
+                    <i data-lucide="bar-chart-2" class="w-4 h-4 text-amber-400"></i> Performans Metrikleri
+                </h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 hover:border-slate-600 transition-colors">
+                        <p class="text-xs text-slate-400 font-medium mb-1">Tespit Edilen Ot</p>
+                        <p class="text-2xl font-bold text-amber-400" id="detect-val">0</p>
+                    </div>
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 hover:border-slate-600 transition-colors">
+                        <p class="text-xs text-slate-400 font-medium mb-1">Mesafe İşareti</p>
+                        <p class="text-2xl font-bold text-sky-400" id="mark-val">0</p>
+                    </div>
+                </div>
+                <div class="mt-4 p-4 bg-slate-800/30 rounded-xl border border-slate-700/30">
+                    <p class="text-xs font-mono text-slate-400 mb-1">Stats String:</p>
+                    <p class="text-sm font-semibold text-emerald-300 leading-relaxed" id="stats-str">-</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- R Sağ Kolon: Nozzle'lar & Kontroller -->
+        <div class="xl:col-span-8 space-y-6">
+
+            <!-- Nozzle Paneli -->
+             <div class="glass-panel rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-slate-400 font-semibold text-sm tracking-wider uppercase flex items-center gap-2">
+                        <i data-lucide="spray-can" class="w-4 h-4 text-rose-400"></i> Değişken Oranlı Püskürtme (VRS)
+                    </h2>
+                </div>
+                
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Nozzle Kartları JS tarafında oluşturulacak/güncellenecek -->
+                    <div class="nozzle-card bg-slate-800/80 p-5 rounded-xl border border-slate-700 flex flex-col items-center relative overflow-hidden" data-idx="0">
+                        <h3 class="font-bold text-slate-300 mb-3 z-10">Nozzle 1</h3>
+                        <div class="w-full h-32 bg-slate-900 rounded-lg relative overflow-hidden border border-slate-700 shadow-inner z-10 group">
+                            <!-- Kamera Görüntüsü -->
+                            <img src="" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity nozzle-cam hidden" alt="cam">
+                            <!-- Püskürtme Barı -->
+                            <div class="absolute bottom-0 w-full bg-gradient-to-t from-emerald-600/80 to-emerald-400/80 nozzle-fill transition-all duration-150" style="height: 0%;"></div>
+                        </div>
+                        <div class="mt-3 font-mono text-sm text-slate-400 z-10 nozzle-pct">0.00</div>
+                    </div>
+                    <div class="nozzle-card bg-slate-800/80 p-5 rounded-xl border border-slate-700 flex flex-col items-center relative overflow-hidden" data-idx="1">
+                        <h3 class="font-bold text-slate-300 mb-3 z-10">Nozzle 2</h3>
+                        <div class="w-full h-32 bg-slate-900 rounded-lg relative overflow-hidden border border-slate-700 shadow-inner z-10 group">
+                            <img src="" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity nozzle-cam hidden" alt="cam">
+                            <div class="absolute bottom-0 w-full bg-gradient-to-t from-emerald-600/80 to-emerald-400/80 nozzle-fill transition-all duration-150" style="height: 0%;"></div>
+                        </div>
+                        <div class="mt-3 font-mono text-sm text-slate-400 z-10 nozzle-pct">0.00</div>
+                    </div>
+                    <div class="nozzle-card bg-slate-800/80 p-5 rounded-xl border border-slate-700 flex flex-col items-center relative overflow-hidden" data-idx="2">
+                        <h3 class="font-bold text-slate-300 mb-3 z-10">Nozzle 3</h3>
+                        <div class="w-full h-32 bg-slate-900 rounded-lg relative overflow-hidden border border-slate-700 shadow-inner z-10 group">
+                            <img src="" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity nozzle-cam hidden" alt="cam">
+                            <div class="absolute bottom-0 w-full bg-gradient-to-t from-emerald-600/80 to-emerald-400/80 nozzle-fill transition-all duration-150" style="height: 0%;"></div>
+                        </div>
+                        <div class="mt-3 font-mono text-sm text-slate-400 z-10 nozzle-pct">0.00</div>
+                    </div>
+                    <div class="nozzle-card bg-slate-800/80 p-5 rounded-xl border border-slate-700 flex flex-col items-center relative overflow-hidden" data-idx="3">
+                        <h3 class="font-bold text-slate-300 mb-3 z-10">Nozzle 4</h3>
+                        <div class="w-full h-32 bg-slate-900 rounded-lg relative overflow-hidden border border-slate-700 shadow-inner z-10 group">
+                            <img src="" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity nozzle-cam hidden" alt="cam">
+                            <div class="absolute bottom-0 w-full bg-gradient-to-t from-emerald-600/80 to-emerald-400/80 nozzle-fill transition-all duration-150" style="height: 0%;"></div>
+                        </div>
+                        <div class="mt-3 font-mono text-sm text-slate-400 z-10 nozzle-pct">0.00</div>
+                    </div>
+                </div>
+             </div>
+
+            <!-- Kontroller Paneli -->
+            <div class="glass-panel rounded-2xl p-6">
+                <h2 class="text-slate-400 font-semibold text-sm tracking-wider uppercase mb-6 flex items-center gap-2">
+                    <i data-lucide="gamepad-2" class="w-4 h-4 text-indigo-400"></i> Sistem Kontrol Paneli
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Otonom Kontroller -->
+                    <div class="space-y-4 border-r border-slate-700/50 pr-4">
+                        <h3 class="font-semibold text-slate-200 mb-2">Otomasyon Sistemleri</h3>
+                        <button id="btn-ai" class="w-full px-4 py-3 rounded-xl font-semibold text-white bg-slate-800 hover:bg-slate-700 border border-slate-600 transition-colors flex items-center justify-center gap-2">
+                            <i data-lucide="cpu" class="w-5 h-5"></i> YOLO Yapay Zeka (AÇ/KAPAT)
+                        </button>
+                        <button id="btn-auto" class="w-full px-4 py-3 rounded-xl font-semibold text-white bg-slate-800 hover:bg-slate-700 border border-slate-600 transition-colors flex items-center justify-center gap-2">
+                            <i data-lucide="route" class="w-5 h-5"></i> GPS Otonom Sürüş (AÇ/KAPAT)
+                        </button>
+                    </div>
+
+                    <!-- Manuel Sürüş -->
+                    <div id="manual-controls" class="space-y-6">
+                        <h3 class="font-semibold text-slate-200 mb-2">Manuel Override</h3>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <label class="text-sm font-medium text-slate-400">Hız (km/h)</label>
+                                <span id="man-speed-val" class="font-mono text-sm">0.0</span>
+                            </div>
+                            <input type="range" id="slider-speed" min="-20" max="20" step="0.5" value="0" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <label class="text-sm font-medium text-slate-400">Direksiyon (rad)</label>
+                                <span id="man-steer-val" class="font-mono text-sm">0.00</span>
+                            </div>
+                            <input type="range" id="slider-steer" min="-0.6" max="0.6" step="0.05" value="0" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+      </div> <!-- \Üst Bölüm Grid Sonu -->
+
+      <!-- ALT BÖLÜM: Dev YOLO Ekranları -->
+      <!-- YOLO Canlı Canlı Tespit (Annotated) Paneli -->
+      <div class="glass-panel rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+              <h2 class="text-slate-400 font-semibold text-sm tracking-wider uppercase flex items-center gap-2">
+                  <i data-lucide="monitor-play" class="w-5 h-5 text-sky-400"></i> YOLO AI Gerçek Zamanlı Tespit (Sunum Modu)
+              </h2>
+          </div>
+          
+          <!-- 2x2 Dev Grid Sistemi -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="bg-slate-900 rounded-xl overflow-hidden border border-slate-700 relative aspect-video flex items-center justify-center shadow-2xl">
+                  <span class="absolute top-4 left-4 px-3 py-1 bg-black/70 text-white text-sm font-mono font-bold tracking-widest rounded-md backdrop-blur z-10 border border-white/10">CAMERA 1 (SOL DIŞ)</span>
+                  <img id="yolo-cam-0" src="" class="w-full h-full object-contain hidden" alt="YOLO 1">
+                  <i data-lucide="camera-off" class="w-12 h-12 text-slate-800 absolute z-0"></i>
+              </div>
+              <div class="bg-slate-900 rounded-xl overflow-hidden border border-slate-700 relative aspect-video flex items-center justify-center shadow-2xl">
+                  <span class="absolute top-4 left-4 px-3 py-1 bg-black/70 text-white text-sm font-mono font-bold tracking-widest rounded-md backdrop-blur z-10 border border-white/10">CAMERA 2 (SOL İÇ)</span>
+                  <img id="yolo-cam-1" src="" class="w-full h-full object-contain hidden" alt="YOLO 2">
+                  <i data-lucide="camera-off" class="w-12 h-12 text-slate-800 absolute z-0"></i>
+              </div>
+              <div class="bg-slate-900 rounded-xl overflow-hidden border border-slate-700 relative aspect-video flex items-center justify-center shadow-2xl">
+                  <span class="absolute top-4 left-4 px-3 py-1 bg-black/70 text-white text-sm font-mono font-bold tracking-widest rounded-md backdrop-blur z-10 border border-white/10">CAMERA 3 (SAĞ İÇ)</span>
+                  <img id="yolo-cam-2" src="" class="w-full h-full object-contain hidden" alt="YOLO 3">
+                  <i data-lucide="camera-off" class="w-12 h-12 text-slate-800 absolute z-0"></i>
+              </div>
+              <div class="bg-slate-900 rounded-xl overflow-hidden border border-slate-700 relative aspect-video flex items-center justify-center shadow-2xl">
+                  <span class="absolute top-4 left-4 px-3 py-1 bg-black/70 text-white text-sm font-mono font-bold tracking-widest rounded-md backdrop-blur z-10 border border-white/10">CAMERA 4 (SAĞ DIŞ)</span>
+                  <img id="yolo-cam-3" src="" class="w-full h-full object-contain hidden" alt="YOLO 4">
+                  <i data-lucide="camera-off" class="w-12 h-12 text-slate-800 absolute z-0"></i>
+              </div>
+          </div>
+      </div>
+
+    </main>
+
+    <script>
+        // Init Icons
+        lucide.createIcons();
+
+        // DOM Elements
+        const connBadge = document.getElementById('conn-badge');
+        const aiBadge = document.getElementById('ai-badge');
+        const autoBadge = document.getElementById('auto-badge');
+        
+        const tankVal = document.getElementById('tank-val');
+        const tankMax = document.getElementById('tank-max');
+        const tankBar = document.getElementById('tank-bar');
+        const tankWarning = document.getElementById('tank-warning');
+
+        const speedVal = document.getElementById('speed-val');
+        const speedBar = document.getElementById('speed-bar');
+        const steerVal = document.getElementById('steer-val');
+        const steerBar = document.getElementById('steer-bar');
+        
+        const detectVal = document.getElementById('detect-val');
+        const markVal = document.getElementById('mark-val');
+        const statsStr = document.getElementById('stats-str');
+
+        const nozzleCards = document.querySelectorAll('.nozzle-card');
+        
+        // Manual sliders
+        const sliderSpeed = document.getElementById('slider-speed');
+        const sliderSteer = document.getElementById('slider-steer');
+        const manSpeedVal = document.getElementById('man-speed-val');
+        const manSteerVal = document.getElementById('man-steer-val');
+
+        // State Variables
+        let manualSpeed = 0.0;
+        let manualSteering = 0.0;
+        let manualNozzles = [0.0, 0.0, 0.0, 0.0];
+        let isAiOn = false;
+        let isAutoOn = false;
+
+        // WebSocket Setup
+        let socket;
+        function connectWebSocket() {
+            // Using standard localhost WebSocket connection
+            socket = new WebSocket("ws://localhost:8000/ws");
+
+            socket.onopen = () => {
+                connBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Connected`;
+                connBadge.className = "px-4 py-1.5 rounded-full text-sm font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-2";
+            };
+
+            socket.onmessage = (event) => {
+                try {
+                    const msg = JSON.parse(event.data);
+                    if (msg.type === "telemetry") {
+                        parseTelemetry(msg.data);
+                    }
+                } catch (e) {
+                    console.error("Parse error:", e);
+                }
+            };
+
+            socket.onclose = () => {
+               connBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span> Disconnected`;
+               connBadge.className = "px-4 py-1.5 rounded-full text-sm font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/30 flex items-center gap-2";
+               setTimeout(connectWebSocket, 3000);
+            };
+        }
+
+        // TELEMETRY PARSER
+        function parseTelemetry(data) {
+            // Example data: 
+            // POS:x,y,z|SPEED:0.0|STEER:0.000|NOZZLES:0.00,1.00,0.50,0.00|MARKS:100|AI_MODE:AUTO|DETECTIONS:50|STATS:Süre:10s...|TANK:950.0/1000.0|AUTOPILOT:Kamera:0.0...
+            
+            const parts = data.trim().split('|');
+            let telemetryMap = {};
+            parts.forEach(p => {
+                const idx = p.indexOf(':');
+                if (idx > -1) {
+                    telemetryMap[p.substring(0, idx)] = p.substring(idx+1);
+                }
+            });
+
+            // 1. TANK
+            if (telemetryMap['TANK']) {
+                const [curStr, maxStr] = telemetryMap['TANK'].split('/');
+                const cur = parseFloat(curStr), max = parseFloat(maxStr);
+                
+                // Update visuals
+                const pct = Math.max(0, Math.min(100, (cur/max) * 100));
+                
+                // Animasyonlu akıtma efekti için CSS
+                tankBar.style.width = `${pct}%`;
+                tankVal.innerHTML = `${Math.floor(cur)}<span class="text-xl text-slate-400 ml-1">L</span>`;
+                tankMax.innerText = `/ ${maxStr} L`;
+
+                if (pct < 10) tankBar.classList.replace('from-blue-600', 'from-rose-600');
+                else tankBar.classList.replace('from-rose-600', 'from-blue-600');
+
+                if (pct <= 0) tankWarning.classList.remove('hidden');
+                else tankWarning.classList.add('hidden');
+            }
+
+            // 2. SPEED & STEER
+            if (telemetryMap['SPEED']) {
+                const speed = parseFloat(telemetryMap['SPEED']);
+                speedVal.innerText = `${speed.toFixed(1)} km/h`;
+                // speed bar 0 to 20 mapped to 50% to 100%, -20 mapped to 0%  (50% is 0 km/h)
+                let s_pct = 50 + (speed / 20) * 50;
+                speedBar.style.width = `${Math.max(0, Math.min(100, s_pct))}%`;
+            }
+            if (telemetryMap['STEER']) {
+                const steer = parseFloat(telemetryMap['STEER']);
+                steerVal.innerText = `${steer.toFixed(3)} rad`;
+                
+                // Steer bar UI logic
+                if (steer < 0) {
+                    // Left (0 to 50%)
+                    let w = (Math.abs(steer) / 0.6) * 50;
+                    steerBar.style.left = `${50 - w}%`;
+                    steerBar.style.width = `${w}%`;
+                } else {
+                    // Right (50 to 100%)
+                    let w = (steer / 0.6) * 50;
+                    steerBar.style.left = `50%`;
+                    steerBar.style.width = `${w}%`;
+                }
+            }
+
+            // 3. NOZZLES
+            if (telemetryMap['NOZZLES']) {
+                const nz = telemetryMap['NOZZLES'].split(',').map(Number);
+                nz.forEach((val, idx) => {
+                    if(idx < nozzleCards.length) {
+                        const card = nozzleCards[idx];
+                        const fill = card.querySelector('.nozzle-fill');
+                        const pctText = card.querySelector('.nozzle-pct');
+                        
+                        const intensityPct = (val * 100).toFixed(0);
+                        fill.style.height = `${intensityPct}%`;
+                        pctText.innerText = `${val.toFixed(2)}`;
+
+                        if (val > 0) {
+                            card.classList.add('border-emerald-500/50', 'shadow-[0_0_20px_rgba(16,185,129,0.15)]');
+                            card.classList.remove('border-slate-700');
+                        } else {
+                            card.classList.remove('border-emerald-500/50', 'shadow-[0_0_20px_rgba(16,185,129,0.15)]');
+                            card.classList.add('border-slate-700');
+                        }
+                    }
+                });
+            }
+
+            // 4. IMAGES
+            if (telemetryMap['IMAGES']) {
+                const imgPaths = telemetryMap['IMAGES'].split(',');
+                const timestamp = new Date().getTime(); // timestamp for cache-busting annotated images
+                
+                imgPaths.forEach((path, idx) => {
+                    if (idx < nozzleCards.length && path) {
+                        const card = nozzleCards[idx];
+                        const imgEl = card.querySelector('.nozzle-cam');
+                        if (imgEl) {
+                            // Using standard localhost URL. The browser will fetch the raw image.
+                            imgEl.src = `http://localhost:8000/ai/${path}`;
+                            imgEl.classList.remove('hidden');
+                        }
+                        
+                        // Upload YOLO Annotated Images
+                        const yoloImg = document.getElementById(`yolo-cam-${idx}`);
+                        if (yoloImg) {
+                            yoloImg.classList.remove('hidden');
+                            yoloImg.src = `http://localhost:8000/ai/dataset/annotated/camera_${idx+1}.jpg?t=${timestamp}`;
+                        }
+                    }
+                });
+            }
+
+            // 5. STATS & MODES
+            if (telemetryMap['MARKS']) markVal.innerText = telemetryMap['MARKS'];
+            if (telemetryMap['DETECTIONS']) detectVal.innerText = telemetryMap['DETECTIONS'];
+            if (telemetryMap['STATS']) statsStr.innerText = telemetryMap['STATS'];
+            
+            if (telemetryMap['AI_MODE']) {
+                const isAuto = telemetryMap['AI_MODE'].includes('AUTO');
+                isAiOn = isAuto;
+                aiBadge.innerText = isAuto ? 'AI: AUTO' : 'AI: MANUAL';
+                aiBadge.className = isAuto ? 
+                    "px-4 py-1.5 rounded-full text-sm font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/50" : 
+                    "px-4 py-1.5 rounded-full text-sm font-semibold bg-slate-800 text-slate-400 border border-slate-700";
+            }
+            if (telemetryMap['AUTOPILOT']) {
+                const isOn = telemetryMap['AUTOPILOT'].trim().length > 0;
+                isAutoOn = isOn;
+                autoBadge.innerText = isOn ? 'AUTO: ON' : 'AUTO: OFF';
+                autoBadge.className = isOn ? 
+                    "px-4 py-1.5 rounded-full text-sm font-semibold bg-indigo-500/20 text-indigo-400 border border-indigo-500/50" : 
+                    "px-4 py-1.5 rounded-full text-sm font-semibold bg-slate-800 text-slate-400 border border-slate-700";
+            }
+        }
+
+        // Send Command Helper
+        function sendCmd(cmd) {
+            if(socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ type: "command", command: cmd }));
+            }
+        }
+
+        // Manual Command Polling (send slider states every 100ms if manual mode)
+        setInterval(() => {
+            // "speed,steering,n1,n2,n3,n4"
+            if (!isAutoOn || !isAiOn) {
+                sendCmd(`${manualSpeed},${manualSteering},${manualNozzles.join(',')}`);
+            }
+        }, 100);
+
+        // Buttons
+        document.getElementById('btn-ai').addEventListener('click', () => {
+            sendCmd(isAiOn ? "AI_OFF" : "AI_ON");
+            isAiOn = !isAiOn;
+        });
+        document.getElementById('btn-auto').addEventListener('click', () => {
+            sendCmd(isAutoOn ? "AUTOPILOT_OFF" : "AUTOPILOT_ON");
+            isAutoOn = !isAutoOn;
+        });
+
+        // Sliders
+        sliderSpeed.addEventListener('input', (e) => {
+            manualSpeed = parseFloat(e.target.value);
+            manSpeedVal.innerText = manualSpeed.toFixed(1);
+        });
+        sliderSteer.addEventListener('input', (e) => {
+            manualSteering = parseFloat(e.target.value);
+            manSteerVal.innerText = manualSteering.toFixed(2);
+        });
+
+        // Initialize connection
+        connectWebSocket();
+    </script>
+</body>
+</html>

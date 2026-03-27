@@ -13,8 +13,13 @@ ultralytics>=8.0.0       # YOLOv8/YOLO11 inference engine
 
 # ── Görüntü İşleme ───────────────────────────────────────────────────
 opencv-python>=4.8.0     # Video okuma, frame işleme, bbox çizimi
-Pillow>=10.0.0           # OpenCV → Tkinter dönüşümü için gerekli
+Pillow>=10.0.0           # OpenCV → Tkinter dönüşümü için gerekli (Eski UIs)
 numpy>=1.24.0            # Sayısal hesaplamalar
+
+# ── Web Dashboard (FastAPI) ─────────────────────────────────────────
+fastapi>=0.100.0         # Web arka ucu
+uvicorn>=0.23.0          # ASGI Server
+websockets>=11.0         # Gerçek zamanlı haberleşme
 
 # ── Not ───────────────────────────────────────────────────────────────
 # ultralytics otomatik olarak torch/torchvision indirir

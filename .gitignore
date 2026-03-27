@@ -6,11 +6,13 @@ __pycache__/
 dist/
 build/
 *.egg
+.venv/
+venv/
 
 # Webots
 *.wbproj
-*.jpg
 *.log
+controllers/*/runtime.ini
 
 # IDE
 .vscode/
@@ -18,10 +20,22 @@ build/
 *.suo
 *.user
 
+# Dataset & AI (Ignore large image files and model results)
+ai/dataset/camera_1/*
+ai/dataset/camera_2/*
+ai/dataset/camera_3/*
+ai/dataset/camera_4/*
+ai/dataset/annotated/
+!ai/dataset/**/.gitkeep
+
+# Models (Optional: keep if you want to push your .pt files)
+# models/*.pt
+
 # OS
 Thumbs.db
 .DS_Store
 
 # Data outputs
 *.csv
-logs/
+# logs/
+# spray_stats_*.csv

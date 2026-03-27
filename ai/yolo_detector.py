@@ -82,7 +82,9 @@ class Detection:
 
     def is_weed(self):
         """Bu tespit bir yabancı ot mu?"""
-        return self.class_id == 0
+        # Sınıf adına bakarak yabancı ot olup olmadığını anla
+        name = str(self.class_name).lower()
+        return "weed" in name or "ot" in name
 
     def __repr__(self):
         return f"Detection({self.class_name}, conf={self.confidence:.2f}, bbox={self.bbox})"
@@ -135,6 +137,9 @@ class YOLODetector:
             try:
                 self.model = YOLO(abs_model_path)
                 self.simulation_mode = False
+                # Modelin kendi sınıf isimlerini kullan (config'i ez)
+                if hasattr(self.model, 'names'):
+                    self.class_names = self.model.names
                 logger.info("✅ YOLO modeli yüklendi: %s", abs_model_path)
             except Exception as e:
                 logger.error("Model yükleme hatası: %s", e)
@@ -208,8 +213,10 @@ class YOLODetector:
                     class_id = int(box.cls[0].cpu().numpy())
                     confidence = float(box.conf[0].cpu().numpy())
 
-                    # Sınıf adını belirle
-                    if class_id < len(self.class_names):
+                    # Sınıf adını belirle (modelin kendi listesinden)
+                    if isinstance(self.class_names, dict) and class_id in self.class_names:
+                        class_name = self.class_names[class_id]
+                    elif isinstance(self.class_names, list) and class_id < len(self.class_names):
                         class_name = self.class_names[class_id]
                     else:
                         class_name = f"unknown_{class_id}"

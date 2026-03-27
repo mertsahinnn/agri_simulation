@@ -53,11 +53,23 @@ YOLO_CONFIDENCE = 0.5
 # 0 = weed (yabancı ot), 1 = crop (bitki)
 YOLO_CLASSES = ["weed", "crop"]
 
-# Her nozzle için video dosyası yolu (proje köküne göreceli)
-# Kullanıcı kendi tarla videolarını bu yollara koyacak
-AI_VIDEO_PATHS = [
-    "ai/videos/camera_1.mp4",   # Nozzle 1 — Sol Dış
-    "ai/videos/camera_2.mp4",   # Nozzle 2 — Sol İç
-    "ai/videos/camera_3.mp4",   # Nozzle 3 — Sağ İç
-    "ai/videos/camera_4.mp4",   # Nozzle 4 — Sağ Dış
+# ── Kameralar (Sanal Kamera Veri Seti Yolları) ────────────────────────
+CAMERA_NAMES = ["camera_1", "camera_2", "camera_3", "camera_4"]
+
+# Her nozzle için kaynak görsel klasörü (proje köküne göreceli)
+AI_DATASET_PATHS = [
+    "ai/dataset/camera_1",   # Nozzle 1 — Sol Dış
+    "ai/dataset/camera_2",   # Nozzle 2 — Sol İç
+    "ai/dataset/camera_3",   # Nozzle 3 — Sağ İç
+    "ai/dataset/camera_4",   # Nozzle 4 — Sağ Dış
 ]
+
+# Desteklenen görsel formatları
+AI_IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg"]
+
+# Görseller arası otomatik geçiş süresi (milisaniye)
+# 500ms = saniyede 2 görsel
+AI_IMAGE_INTERVAL_MS = 500
+
+# YOLO tahmininin kaç adımda bir çalışacağı (Performans için)
+AI_DETECTION_INTERVAL = 5

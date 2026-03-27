@@ -126,6 +126,14 @@ PROTO Sprayer [
           DEF NOZZLE_1 Pose {
             translation 0 -0.9 0
             children [
+              DEF CAMERA_1 Camera {
+                translation 0 0 0.05
+                rotation 0 1 0 -1.570796
+                name "camera_1"
+                fieldOfView 1.047
+                width 320
+                height 240
+              }
               # Nozzle pipe
               Pose {
                 translation 0 0 -0.06
@@ -193,6 +201,14 @@ PROTO Sprayer [
           DEF NOZZLE_2 Pose {
             translation 0 -0.3 0
             children [
+              DEF CAMERA_2 Camera {
+                translation 0 0 0.05
+                rotation 0 1 0 -1.570796
+                name "camera_2"
+                fieldOfView 1.047
+                width 320
+                height 240
+              }
               Pose {
                 translation 0 0 -0.06
                 children [
@@ -256,6 +272,14 @@ PROTO Sprayer [
           DEF NOZZLE_3 Pose {
             translation 0 0.3 0
             children [
+              DEF CAMERA_3 Camera {
+                translation 0 0 0.05
+                rotation 0 1 0 -1.570796
+                name "camera_3"
+                fieldOfView 1.047
+                width 320
+                height 240
+              }
               Pose {
                 translation 0 0 -0.06
                 children [
@@ -319,6 +343,14 @@ PROTO Sprayer [
           DEF NOZZLE_4 Pose {
             translation 0 0.9 0
             children [
+              DEF CAMERA_4 Camera {
+                translation 0 0 0.05
+                rotation 0 1 0 -1.570796
+                name "camera_4"
+                fieldOfView 1.047
+                width 320
+                height 240
+              }
               Pose {
                 translation 0 0 -0.06
                 children [

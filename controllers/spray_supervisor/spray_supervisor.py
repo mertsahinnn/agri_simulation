@@ -50,13 +50,12 @@ logger.info("Emitter bulundu")
 # ── Camera + AI Weed Detection ────────────────────────────────────────
 from weed_detector import WeedDetector
 
-camera = supervisor.getDevice("weed_camera")
-weed_detector = WeedDetector(camera, timestep)
+camera_names = ["camera_1", "camera_2", "camera_3", "camera_4"]
+cameras = [supervisor.getDevice(name) for name in camera_names]
+weed_detector = WeedDetector(cameras, timestep)
 
 # AI mode: True = automatic nozzle control, False = manual (UI) control
 ai_mode = False
-AI_DETECTION_INTERVAL = 5   # run detection every N steps
-
 logger.info("AI Tespit Sistemi: %s", "HAZIR" if weed_detector.is_enabled else "DEVRE DIŞI")
 
 # ── Statistics ────────────────────────────────────────────────────────
@@ -80,8 +79,12 @@ socket_lock = threading.Lock()
 
 current_speed = 0.0
 current_steering = 0.0
-nozzle_states = [0] * NUM_NOZZLES
-prev_nozzle_states = [0] * NUM_NOZZLES
+nozzle_states = [0.0] * NUM_NOZZLES
+prev_nozzle_states = [0.0] * NUM_NOZZLES
+
+tank_level = 1000.0  # liters
+TANK_MAX = 1000.0
+FLOW_RATE = 10.0 # liters per second per nozzle at 1.0 intensity
 
 
 def setup_socket():
@@ -110,15 +113,18 @@ def send_status(tractor_pos):
             detections = weed_detector.total_detections if weed_detector.is_enabled else 0
             stats_str = stats.get_status_string()
             auto_str = autopilot.get_status_string() if autopilot.is_active else ""
+            img_paths = weed_detector.current_image_paths if hasattr(weed_detector, 'current_image_paths') else ["", "", "", ""]
             status = (f"POS:{tractor_pos[0]:.2f},{tractor_pos[1]:.2f},{tractor_pos[2]:.2f}"
                       f"|SPEED:{current_speed:.1f}"
                       f"|STEER:{current_steering:.3f}"
-                      f"|NOZZLES:{n[0]},{n[1]},{n[2]},{n[3]}"
+                      f"|NOZZLES:{n[0]:.2f},{n[1]:.2f},{n[2]:.2f},{n[3]:.2f}"
                       f"|MARKS:{mark_counter}"
                       f"|AI_MODE:{ai_str}"
                       f"|DETECTIONS:{detections}"
                       f"|STATS:{stats_str}"
-                      f"|AUTOPILOT:{auto_str}\n")
+                      f"|TANK:{tank_level:.1f}/{TANK_MAX:.1f}"
+                      f"|AUTOPILOT:{auto_str}"
+                      f"|IMAGES:{','.join(img_paths)}\n")
             client_socket.sendall(status.encode('utf-8'))
         except (BrokenPipeError, ConnectionResetError, OSError):
             pass
@@ -164,7 +170,7 @@ def handle_client():
                         current_steering = float(parts[1])
                         if not ai_mode:
                             for i in range(NUM_NOZZLES):
-                                nozzle_states[i] = int(float(parts[2 + i]))
+                                nozzle_states[i] = float(parts[2 + i])
                         logger.debug("Hız: %.1f, Direksiyon: %.3f, Nozzle: %s",
                                      current_speed, current_steering, nozzle_states)
                     except ValueError:
@@ -385,27 +391,32 @@ def place_ground_mark(x, y):
 
 
 def update_spray_visuals():
-    """Toggle spray cone visuals and lights based on nozzle states."""
+    """Toggle spray cone visuals and lights based on nozzle states (variable rate)."""
     for i in range(NUM_NOZZLES):
-        if nozzle_states[i] != prev_nozzle_states[i]:
+        intensity = nozzle_states[i] # 0.0 to 1.0 (float)
+        
+        if intensity != prev_nozzle_states[i]:
             if i < len(spray_visual_transparency_fields) and spray_visual_transparency_fields[i]:
                 try:
-                    t = SPRAY_ON_TRANSPARENCY if nozzle_states[i] else SPRAY_OFF_TRANSPARENCY
+                    # Variable transparency
+                    t = SPRAY_OFF_TRANSPARENCY - intensity * (SPRAY_OFF_TRANSPARENCY - SPRAY_ON_TRANSPARENCY)
                     spray_visual_transparency_fields[i].setSFFloat(t)
                 except Exception:
                     pass
 
             if i < len(spray_light_intensity_fields) and spray_light_intensity_fields[i]:
                 try:
-                    intensity = SPRAY_LIGHT_ON_INTENSITY if nozzle_states[i] else SPRAY_LIGHT_OFF_INTENSITY
-                    spray_light_intensity_fields[i].setSFFloat(intensity)
+                    # Variable intensity
+                    light_val = SPRAY_LIGHT_OFF_INTENSITY + intensity * (SPRAY_LIGHT_ON_INTENSITY - SPRAY_LIGHT_OFF_INTENSITY)
+                    spray_light_intensity_fields[i].setSFFloat(light_val)
                 except Exception:
                     pass
 
-            state_str = "AÇIK" if nozzle_states[i] else "KAPALI"
-            logger.info("Nozzle %d: %s", i + 1, state_str)
+            state_str = f"AÇIK ({intensity:.2f})" if intensity > 0 else "KAPALI"
+            if abs(intensity - prev_nozzle_states[i]) > 0.1: # Only log major changes
+                logger.info("Nozzle %d: %s", i + 1, state_str)
 
-            prev_nozzle_states[i] = nozzle_states[i]
+            prev_nozzle_states[i] = intensity
 
 
 def send_driving_command():
@@ -474,13 +485,33 @@ while supervisor.step(timestep) != -1:
             except Exception:
                 pass
 
+    from config import AI_DETECTION_INTERVAL
+    
     # ── AI Weed Detection ──
     if ai_mode and weed_detector.is_enabled and step_count % AI_DETECTION_INTERVAL == 0:
-        ai_nozzles = weed_detector.detect()
-        for i in range(NUM_NOZZLES):
-            nozzle_states[i] = ai_nozzles[i]
-        if any(ai_nozzles) and step_count % 50 == 0:
-            logger.info("AI tespit: Nozzle durumu = %s", ai_nozzles)
+        if tank_level > 0.0:
+            ai_nozzles = weed_detector.detect()
+            for i in range(NUM_NOZZLES):
+                nozzle_states[i] = ai_nozzles[i]
+            if any(v > 0 for v in ai_nozzles) and step_count % 50 == 0:
+                logger.info("AI tespit: Nozzle durumu = %s", [f"{v:.2f}" for v in ai_nozzles])
+        else:
+            nozzle_states = [0.0] * NUM_NOZZLES
+
+    # ── Tank Logic ──
+    if tank_level <= 0.0:
+        if current_speed != 0.0 or any(v > 0 for v in nozzle_states) or autopilot.is_active:
+            current_speed = 0.0
+            autopilot.stop()
+            nozzle_states = [0.0] * NUM_NOZZLES
+            # Send warning only once or periodically
+            if step_count % (STATUS_SEND_INTERVAL_MS * 10 // timestep) == 0:
+                logger.warning("TANK BOŞ! Sistem durduruldu.")
+    else:
+        # Reduce tank based on current nozzle intensities
+        dt = timestep / 1000.0
+        consumption = sum(nozzle_states) * FLOW_RATE * dt
+        tank_level = max(0.0, tank_level - consumption)
 
     # ── Autopilot ──
     if autopilot.is_active and tractor_node:
