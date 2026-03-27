@@ -1,38 +1,86 @@
-# 🚜 Agricultural Spraying Simulation
+# 🚜 AgriSim: Akıllı Tarımsal İlaçlama Simülasyonu
 
-AI-powered precision spraying simulation built with **Webots R2025a**. A tractor-mounted 4-nozzle boom sprayer uses computer vision to distinguish weeds from crops, reducing pesticide waste.
+YOLOv8 tabanlı yabancı ot tespiti ve modern web dashboard arayüzüne sahip, **Webots R2025a** üzerinde geliştirilmiş hassas ilaçlama simülasyonu. Traktöre monte edilmiş 4 nozullu püskürtücü sistemi, bilgisayarlı görü kullanarak yabancı otları ekinlerden ayırır ve değişken oranlı ilaçlama (VRS) yapar.
 
-## Project Structure
+## 🌟 Özellikler
 
-```
+*   **YOLOv8 Entegrasyonu:** Gerçek dünya veri setleri üzerinden eğitilmiş model ile anlık yabancı ot tespiti.
+*   **Modern Dashboard:** FastAPI ve WebSocket tabanlı, gerçek zamanlı telemetri ve kamera görüntüsü sunan web arayüzü.
+*   **Değişken Oranlı İlaçlama (VRS):** Tespit edilen yabancı otun güven skoruna göre nozul püskürtme şiddetinin otomatik ayarlanması.
+*   **Otopilot Sistemi:** Şerit takip algoritması ile tarlada otonom sürüş.
+*   **Tank Yönetimi:** Gerçek zamanlı sıvı tüketimi ve düşük tank seviyesi koruması.
+
+## 🏗️ Proje Yapısı
+
+```text
 agri_simulation/
-├── config.py                     # Central configuration
+├── ai/
+│   ├── dataset/          # Kamera kaynak görselleri (Kamera 1-4)
+│   ├── models/           # Eğitilmiş YOLO (.pt) modelleri
+│   └── yolo_detector.py  # YOLO çıkarım ve görselleştirme mantığı
 ├── controllers/
-│   ├── spray_supervisor/         # Supervisor: socket server, spray visuals, ground marks
-│   ├── tractor_sprayer_controller/  # Tractor driver + UI
-│   └── tractor_keyboard_controller/ # Legacy keyboard controller
-├── protos/
-│   ├── Sprayer.proto             # 4-nozzle boom sprayer model
-│   └── SandyGround.proto        # Ground appearance
-├── ui/                           # Standalone UI (legacy)
+│   ├── spray_supervisor/ # Simülasyon beyni (Socket, AI, Görsel Efektler)
+│   └── tractor_sprayer_controller/ # Traktör sürüş mantığı
+├── ui/
+│   ├── dashboard/        # Modern Web Dashboard (HTML/JS)
+│   └── dashboard_backend.py # FastAPI WebSocket Köprüsü
+├── config.py             # Merkezi konfigürasyon (Portlar, Hızlar, AI Ayarları)
 └── worlds/
-    └── agri_robot.wbt            # Main simulation world
+    └── agri_robot.wbt     # Ana Webots dünyası
 ```
 
-## How to Run
+## 🚀 Başlatma Talimatları
 
-1. **Open** `worlds/agri_robot.wbt` in Webots R2025a
-2. **Start** the simulation — controllers load automatically
-3. **Launch UI** (optional): `python controllers/tractor_sprayer_controller/tractor_ui.py`
-4. Click **BAĞLAN** (Connect) in the UI to control the tractor
+### 1. Hazırlık ve Kurulum
 
-## Architecture
+Öncelikle gerekli kütüphaneleri yüklemek için bir sanal ortam oluşturun:
 
-- **Spray Supervisor** (`spray_supervisor.py`): Runs as a Webots Supervisor robot. Hosts a TCP socket server (port 5005), receives commands from the UI, forwards driving commands to the tractor via Emitter/Receiver, and manages spray visual effects + ground marks.
-- **Tractor Driver** (`tractor_sprayer_controller.py`): Receives speed/steering commands from the Supervisor via Receiver and applies them using the Driver API.
-- **UI** (`tractor_ui.py`): Tkinter-based dark-themed control panel with speed, steering, and nozzle controls.
+```bash
+# Sanal ortam oluştur (Windows)
+python -m venv .venv
+.\.venv\Scripts\activate
 
-## Requirements
+# Gerekli kütüphaneleri yükle
+pip install -r requirements.txt
+```
 
-- Webots R2025a
-- Python 3.10+
+### 2. Webots Yapılandırması (Kritik)
+
+Webots'un projedeki kütüphaneleri (ultralytics, opencv vb.) görebilmesi için:
+
+1.  Webots'u açın.
+2.  **Tools -> Preferences -> General** yolunu izleyin.
+3.  **Python command** kısmına projenizdeki sanal ortamın yolunu yazın:
+    `C:\...proje_yolu...\.venv\Scripts\python.exe`
+
+### 3. Sistemi Çalıştırma
+
+Sistem iki parçadan oluşur; simülasyon ve arayüz:
+
+**A. Simülasyonu Başlatın:**
+*   `worlds/agri_robot.wbt` dosyasını Webots ile açın ve simülasyonu "Run" moduna alın.
+
+**B. Dashboard Backend'i Başlatın:**
+*   Terminalinizde şu komutu çalıştırın:
+    ```bash
+    python -m uvicorn ui.dashboard_backend:app --host 0.0.0.0 --port 8000
+    ```
+
+**C. Dashboard'ı Açın:**
+*   Tarayıcınızda `ui/dashboard/index.html` dosyasını açın (veya Live Server kullanın).
+*   Sağ üstte "Connected" yazısını gördüğünüzde sistem hazırdır.
+
+## 🎮 Kullanım Rehberi
+
+*   **MANUEL:** Dashboard üzerindeki sliderlar ile traktörü sürebilir ve nozulları kontrol edebilirsiniz.
+*   **AI MODE:** "YOLO AI" butonuna bastığınızda sistem veri setindeki resimler üzerinden tespit yapmaya başlar ve yabancı ot gördüğünde ilgili nozulu otomatik açar.
+*   **AUTOPILOT:** "GPS Otonom Sürüş" butonuna bastığınızda traktör tarladaki şeritleri otomatik takip eder.
+
+## 📋 Gereksinimler
+
+*   Webots R2025a
+*   Python 3.10+
+*   Ultralytics (YOLOv8)
+*   FastAPI & Uvicorn-Standard
+*   OpenCV
+
