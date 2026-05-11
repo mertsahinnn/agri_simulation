@@ -149,6 +149,10 @@
                     <p class="text-xs font-mono text-slate-400 mb-1">Stats String:</p>
                     <p class="text-sm font-semibold text-emerald-300 leading-relaxed" id="stats-str">-</p>
                 </div>
+                <div id="autopilot-panel" class="mt-4 p-4 bg-indigo-900/20 rounded-xl border border-indigo-500/20 hidden">
+                    <p class="text-xs font-mono text-slate-400 mb-1 flex items-center gap-1"><i data-lucide="navigation" class="w-3 h-3"></i> Otopilot Durumu:</p>
+                    <p class="text-sm font-semibold text-indigo-300 leading-relaxed" id="autopilot-str">-</p>
+                </div>
             </div>
 
         </div>
@@ -165,40 +169,69 @@
                 </div>
                 
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <!-- Nozzle Kartları JS tarafında oluşturulacak/güncellenecek -->
-                    <div class="nozzle-card bg-slate-800/80 p-5 rounded-xl border border-slate-700 flex flex-col items-center relative overflow-hidden" data-idx="0">
-                        <h3 class="font-bold text-slate-300 mb-3 z-10">Nozzle 1</h3>
-                        <div class="w-full h-32 bg-slate-900 rounded-lg relative overflow-hidden border border-slate-700 shadow-inner z-10 group">
-                            <!-- Kamera Görüntüsü -->
-                            <img src="" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity nozzle-cam hidden" alt="cam">
-                            <!-- Püskürtme Barı -->
-                            <div class="absolute bottom-0 w-full bg-gradient-to-t from-emerald-600/80 to-emerald-400/80 nozzle-fill transition-all duration-150" style="height: 0%;"></div>
+                    <!-- Nozzle 1: Sol Dış -->
+                    <div class="nozzle-card bg-slate-800/80 p-5 rounded-xl border border-slate-700 flex flex-col items-center relative overflow-hidden transition-all duration-300" data-idx="0">
+                        <div class="flex items-center gap-2 mb-3 z-10">
+                            <i data-lucide="droplets" class="w-4 h-4 text-slate-500 nozzle-icon"></i>
+                            <h3 class="font-bold text-slate-300 text-sm">N1 · Sol Dış</h3>
                         </div>
-                        <div class="mt-3 font-mono text-sm text-slate-400 z-10 nozzle-pct">0.00</div>
+                        <div class="w-full h-36 bg-slate-900 rounded-xl relative overflow-hidden border border-slate-700 shadow-inner z-10 flex items-center justify-center">
+                            <div class="absolute bottom-0 w-full bg-gradient-to-t from-emerald-600 via-emerald-500 to-emerald-400/60 nozzle-fill" style="height: 0%;"></div>
+                            <span class="relative z-10 text-3xl font-black tracking-tight text-white/90 nozzle-pct-big">0%</span>
+                        </div>
+                        <div class="mt-3 flex items-center gap-2 z-10">
+                            <span class="w-2 h-2 rounded-full bg-slate-600 nozzle-dot"></span>
+                            <span class="font-mono text-xs text-slate-400 nozzle-pct">0.00</span>
+                            <span class="text-xs text-slate-500 nozzle-status">PASIF</span>
+                        </div>
                     </div>
-                    <div class="nozzle-card bg-slate-800/80 p-5 rounded-xl border border-slate-700 flex flex-col items-center relative overflow-hidden" data-idx="1">
-                        <h3 class="font-bold text-slate-300 mb-3 z-10">Nozzle 2</h3>
-                        <div class="w-full h-32 bg-slate-900 rounded-lg relative overflow-hidden border border-slate-700 shadow-inner z-10 group">
-                            <img src="" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity nozzle-cam hidden" alt="cam">
-                            <div class="absolute bottom-0 w-full bg-gradient-to-t from-emerald-600/80 to-emerald-400/80 nozzle-fill transition-all duration-150" style="height: 0%;"></div>
+                    <!-- Nozzle 2: Sol İç -->
+                    <div class="nozzle-card bg-slate-800/80 p-5 rounded-xl border border-slate-700 flex flex-col items-center relative overflow-hidden transition-all duration-300" data-idx="1">
+                        <div class="flex items-center gap-2 mb-3 z-10">
+                            <i data-lucide="droplets" class="w-4 h-4 text-slate-500 nozzle-icon"></i>
+                            <h3 class="font-bold text-slate-300 text-sm">N2 · Sol İç</h3>
                         </div>
-                        <div class="mt-3 font-mono text-sm text-slate-400 z-10 nozzle-pct">0.00</div>
+                        <div class="w-full h-36 bg-slate-900 rounded-xl relative overflow-hidden border border-slate-700 shadow-inner z-10 flex items-center justify-center">
+                            <div class="absolute bottom-0 w-full bg-gradient-to-t from-emerald-600 via-emerald-500 to-emerald-400/60 nozzle-fill" style="height: 0%;"></div>
+                            <span class="relative z-10 text-3xl font-black tracking-tight text-white/90 nozzle-pct-big">0%</span>
+                        </div>
+                        <div class="mt-3 flex items-center gap-2 z-10">
+                            <span class="w-2 h-2 rounded-full bg-slate-600 nozzle-dot"></span>
+                            <span class="font-mono text-xs text-slate-400 nozzle-pct">0.00</span>
+                            <span class="text-xs text-slate-500 nozzle-status">PASIF</span>
+                        </div>
                     </div>
-                    <div class="nozzle-card bg-slate-800/80 p-5 rounded-xl border border-slate-700 flex flex-col items-center relative overflow-hidden" data-idx="2">
-                        <h3 class="font-bold text-slate-300 mb-3 z-10">Nozzle 3</h3>
-                        <div class="w-full h-32 bg-slate-900 rounded-lg relative overflow-hidden border border-slate-700 shadow-inner z-10 group">
-                            <img src="" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity nozzle-cam hidden" alt="cam">
-                            <div class="absolute bottom-0 w-full bg-gradient-to-t from-emerald-600/80 to-emerald-400/80 nozzle-fill transition-all duration-150" style="height: 0%;"></div>
+                    <!-- Nozzle 3: Sağ İç -->
+                    <div class="nozzle-card bg-slate-800/80 p-5 rounded-xl border border-slate-700 flex flex-col items-center relative overflow-hidden transition-all duration-300" data-idx="2">
+                        <div class="flex items-center gap-2 mb-3 z-10">
+                            <i data-lucide="droplets" class="w-4 h-4 text-slate-500 nozzle-icon"></i>
+                            <h3 class="font-bold text-slate-300 text-sm">N3 · Sağ İç</h3>
                         </div>
-                        <div class="mt-3 font-mono text-sm text-slate-400 z-10 nozzle-pct">0.00</div>
+                        <div class="w-full h-36 bg-slate-900 rounded-xl relative overflow-hidden border border-slate-700 shadow-inner z-10 flex items-center justify-center">
+                            <div class="absolute bottom-0 w-full bg-gradient-to-t from-emerald-600 via-emerald-500 to-emerald-400/60 nozzle-fill" style="height: 0%;"></div>
+                            <span class="relative z-10 text-3xl font-black tracking-tight text-white/90 nozzle-pct-big">0%</span>
+                        </div>
+                        <div class="mt-3 flex items-center gap-2 z-10">
+                            <span class="w-2 h-2 rounded-full bg-slate-600 nozzle-dot"></span>
+                            <span class="font-mono text-xs text-slate-400 nozzle-pct">0.00</span>
+                            <span class="text-xs text-slate-500 nozzle-status">PASIF</span>
+                        </div>
                     </div>
-                    <div class="nozzle-card bg-slate-800/80 p-5 rounded-xl border border-slate-700 flex flex-col items-center relative overflow-hidden" data-idx="3">
-                        <h3 class="font-bold text-slate-300 mb-3 z-10">Nozzle 4</h3>
-                        <div class="w-full h-32 bg-slate-900 rounded-lg relative overflow-hidden border border-slate-700 shadow-inner z-10 group">
-                            <img src="" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity nozzle-cam hidden" alt="cam">
-                            <div class="absolute bottom-0 w-full bg-gradient-to-t from-emerald-600/80 to-emerald-400/80 nozzle-fill transition-all duration-150" style="height: 0%;"></div>
+                    <!-- Nozzle 4: Sağ Dış -->
+                    <div class="nozzle-card bg-slate-800/80 p-5 rounded-xl border border-slate-700 flex flex-col items-center relative overflow-hidden transition-all duration-300" data-idx="3">
+                        <div class="flex items-center gap-2 mb-3 z-10">
+                            <i data-lucide="droplets" class="w-4 h-4 text-slate-500 nozzle-icon"></i>
+                            <h3 class="font-bold text-slate-300 text-sm">N4 · Sağ Dış</h3>
                         </div>
-                        <div class="mt-3 font-mono text-sm text-slate-400 z-10 nozzle-pct">0.00</div>
+                        <div class="w-full h-36 bg-slate-900 rounded-xl relative overflow-hidden border border-slate-700 shadow-inner z-10 flex items-center justify-center">
+                            <div class="absolute bottom-0 w-full bg-gradient-to-t from-emerald-600 via-emerald-500 to-emerald-400/60 nozzle-fill" style="height: 0%;"></div>
+                            <span class="relative z-10 text-3xl font-black tracking-tight text-white/90 nozzle-pct-big">0%</span>
+                        </div>
+                        <div class="mt-3 flex items-center gap-2 z-10">
+                            <span class="w-2 h-2 rounded-full bg-slate-600 nozzle-dot"></span>
+                            <span class="font-mono text-xs text-slate-400 nozzle-pct">0.00</span>
+                            <span class="text-xs text-slate-500 nozzle-status">PASIF</span>
+                        </div>
                     </div>
                 </div>
              </div>
@@ -259,22 +292,22 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="bg-slate-900 rounded-xl overflow-hidden border border-slate-700 relative aspect-video flex items-center justify-center shadow-2xl">
                   <span class="absolute top-4 left-4 px-3 py-1 bg-black/70 text-white text-sm font-mono font-bold tracking-widest rounded-md backdrop-blur z-10 border border-white/10">CAMERA 1 (SOL DIŞ)</span>
-                  <img id="yolo-cam-0" src="" class="w-full h-full object-contain hidden" alt="YOLO 1">
+                  <img id="yolo-cam-0" data-stream-url="http://localhost:8000/stream/0" src="" class="w-full h-full object-contain" alt="YOLO 1">
                   <i data-lucide="camera-off" class="w-12 h-12 text-slate-800 absolute z-0"></i>
               </div>
               <div class="bg-slate-900 rounded-xl overflow-hidden border border-slate-700 relative aspect-video flex items-center justify-center shadow-2xl">
                   <span class="absolute top-4 left-4 px-3 py-1 bg-black/70 text-white text-sm font-mono font-bold tracking-widest rounded-md backdrop-blur z-10 border border-white/10">CAMERA 2 (SOL İÇ)</span>
-                  <img id="yolo-cam-1" src="" class="w-full h-full object-contain hidden" alt="YOLO 2">
+                  <img id="yolo-cam-1" data-stream-url="http://localhost:8000/stream/1" src="" class="w-full h-full object-contain" alt="YOLO 2">
                   <i data-lucide="camera-off" class="w-12 h-12 text-slate-800 absolute z-0"></i>
               </div>
               <div class="bg-slate-900 rounded-xl overflow-hidden border border-slate-700 relative aspect-video flex items-center justify-center shadow-2xl">
                   <span class="absolute top-4 left-4 px-3 py-1 bg-black/70 text-white text-sm font-mono font-bold tracking-widest rounded-md backdrop-blur z-10 border border-white/10">CAMERA 3 (SAĞ İÇ)</span>
-                  <img id="yolo-cam-2" src="" class="w-full h-full object-contain hidden" alt="YOLO 3">
+                  <img id="yolo-cam-2" data-stream-url="http://localhost:8000/stream/2" src="" class="w-full h-full object-contain" alt="YOLO 3">
                   <i data-lucide="camera-off" class="w-12 h-12 text-slate-800 absolute z-0"></i>
               </div>
               <div class="bg-slate-900 rounded-xl overflow-hidden border border-slate-700 relative aspect-video flex items-center justify-center shadow-2xl">
                   <span class="absolute top-4 left-4 px-3 py-1 bg-black/70 text-white text-sm font-mono font-bold tracking-widest rounded-md backdrop-blur z-10 border border-white/10">CAMERA 4 (SAĞ DIŞ)</span>
-                  <img id="yolo-cam-3" src="" class="w-full h-full object-contain hidden" alt="YOLO 4">
+                  <img id="yolo-cam-3" data-stream-url="http://localhost:8000/stream/3" src="" class="w-full h-full object-contain" alt="YOLO 4">
                   <i data-lucide="camera-off" class="w-12 h-12 text-slate-800 absolute z-0"></i>
               </div>
           </div>
@@ -304,6 +337,8 @@
         const detectVal = document.getElementById('detect-val');
         const markVal = document.getElementById('mark-val');
         const statsStr = document.getElementById('stats-str');
+        const autopilotPanel = document.getElementById('autopilot-panel');
+        const autopilotStr = document.getElementById('autopilot-str');
 
         const nozzleCards = document.querySelectorAll('.nozzle-card');
         
@@ -320,13 +355,37 @@
         let isAiOn = false;
         let isAutoOn = false;
 
-        // WebSocket Setup
+        // WebSocket Setup with Exponential Backoff
         let socket;
+        let reconnectDelay = 500; // Başlangıç: 500ms
+        const MAX_RECONNECT_DELAY = 5000;
+
+        function resetUI() {
+            // Bağlantı kesilince tüm verileri sıfırla (B.3)
+            speedVal.innerText = '0.0 km/h';
+            speedBar.style.width = '50%';
+            steerVal.innerText = '0.000 rad';
+            steerBar.style.left = '50%';
+            steerBar.style.width = '0%';
+            detectVal.innerText = '0';
+            markVal.innerText = '0';
+            statsStr.innerText = '-';
+            autopilotPanel.classList.add('hidden');
+            nozzleCards.forEach(card => {
+                const fill = card.querySelector('.nozzle-fill');
+                const pct = card.querySelector('.nozzle-pct');
+                if (fill) fill.style.height = '0%';
+                if (pct) pct.innerText = '0.00';
+                card.classList.remove('border-emerald-500/50', 'shadow-[0_0_20px_rgba(16,185,129,0.15)]');
+                card.classList.add('border-slate-700');
+            });
+        }
+
         function connectWebSocket() {
-            // Using standard localhost WebSocket connection
             socket = new WebSocket("ws://localhost:8000/ws");
 
             socket.onopen = () => {
+                reconnectDelay = 500; // Bağlanınca sıfırla
                 connBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Connected`;
                 connBadge.className = "px-4 py-1.5 rounded-full text-sm font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-2";
             };
@@ -343,25 +402,38 @@
             };
 
             socket.onclose = () => {
-               connBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span> Disconnected`;
+               connBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span> Reconnecting...`;
                connBadge.className = "px-4 py-1.5 rounded-full text-sm font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/30 flex items-center gap-2";
-               setTimeout(connectWebSocket, 3000);
+               resetUI();
+               setTimeout(connectWebSocket, reconnectDelay);
+               reconnectDelay = Math.min(reconnectDelay * 2, MAX_RECONNECT_DELAY);
             };
         }
 
-        // TELEMETRY PARSER
+        // TELEMETRY PARSER (Pipe-Safe: STATS içindeki | karakterini doğru işler)
         function parseTelemetry(data) {
-            // Example data: 
-            // POS:x,y,z|SPEED:0.0|STEER:0.000|NOZZLES:0.00,1.00,0.50,0.00|MARKS:100|AI_MODE:AUTO|DETECTIONS:50|STATS:Süre:10s...|TANK:950.0/1000.0|AUTOPILOT:Kamera:0.0...
-            
-            const parts = data.trim().split('|');
-            let telemetryMap = {};
-            parts.forEach(p => {
-                const idx = p.indexOf(':');
-                if (idx > -1) {
-                    telemetryMap[p.substring(0, idx)] = p.substring(idx+1);
+            const knownKeys = ['POS','SPEED','STEER','NOZZLES','MARKS','AI_MODE','DETECTIONS','STATS','TANK','AUTOPILOT'];
+            const telemetryMap = {};
+
+            // Her bilinen key'in veri başlangıç pozisyonunu bul
+            const entries = [];
+            for (const k of knownKeys) {
+                const marker = `|${k}:`;
+                let idx = data.indexOf(marker);
+                if (idx >= 0) {
+                    entries.push({ key: k, pos: idx, valStart: idx + marker.length });
+                } else if (data.startsWith(`${k}:`)) {
+                    entries.push({ key: k, pos: 0, valStart: k.length + 1 });
                 }
-            });
+            }
+            entries.sort((a, b) => a.pos - b.pos);
+
+            // Her key'in değerini bir sonraki key'e kadar al
+            for (let i = 0; i < entries.length; i++) {
+                const start = entries[i].valStart;
+                const end = (i + 1 < entries.length) ? entries[i + 1].pos : data.length;
+                telemetryMap[entries[i].key] = data.substring(start, end).trim();
+            }
 
             // 1. TANK
             if (telemetryMap['TANK']) {
@@ -379,8 +451,20 @@
                 if (pct < 10) tankBar.classList.replace('from-blue-600', 'from-rose-600');
                 else tankBar.classList.replace('from-rose-600', 'from-blue-600');
 
-                if (pct <= 0) tankWarning.classList.remove('hidden');
-                else tankWarning.classList.add('hidden');
+                if (pct <= 0) {
+                    tankWarning.classList.remove('hidden');
+                    // B.2: Tank boşken kontrolleri devre dışı bırak
+                    sliderSpeed.disabled = true;
+                    sliderSteer.disabled = true;
+                    sliderSpeed.classList.add('opacity-30', 'cursor-not-allowed');
+                    sliderSteer.classList.add('opacity-30', 'cursor-not-allowed');
+                } else {
+                    tankWarning.classList.add('hidden');
+                    sliderSpeed.disabled = false;
+                    sliderSteer.disabled = false;
+                    sliderSpeed.classList.remove('opacity-30', 'cursor-not-allowed');
+                    sliderSteer.classList.remove('opacity-30', 'cursor-not-allowed');
+                }
             }
 
             // 2. SPEED & STEER
@@ -417,46 +501,33 @@
                         const card = nozzleCards[idx];
                         const fill = card.querySelector('.nozzle-fill');
                         const pctText = card.querySelector('.nozzle-pct');
+                        const pctBig = card.querySelector('.nozzle-pct-big');
+                        const dot = card.querySelector('.nozzle-dot');
+                        const status = card.querySelector('.nozzle-status');
+                        const icon = card.querySelector('.nozzle-icon');
                         
                         const intensityPct = (val * 100).toFixed(0);
-                        fill.style.height = `${intensityPct}%`;
-                        pctText.innerText = `${val.toFixed(2)}`;
+                        if (fill) fill.style.height = `${intensityPct}%`;
+                        if (pctText) pctText.innerText = `${val.toFixed(2)}`;
+                        if (pctBig) pctBig.innerText = `${intensityPct}%`;
 
                         if (val > 0) {
                             card.classList.add('border-emerald-500/50', 'shadow-[0_0_20px_rgba(16,185,129,0.15)]');
                             card.classList.remove('border-slate-700');
+                            if (dot) { dot.classList.remove('bg-slate-600'); dot.classList.add('bg-emerald-400', 'animate-pulse'); }
+                            if (status) { status.innerText = 'AKTİF'; status.classList.remove('text-slate-500'); status.classList.add('text-emerald-400'); }
+                            if (icon) { icon.classList.remove('text-slate-500'); icon.classList.add('text-emerald-400'); }
                         } else {
                             card.classList.remove('border-emerald-500/50', 'shadow-[0_0_20px_rgba(16,185,129,0.15)]');
                             card.classList.add('border-slate-700');
+                            if (dot) { dot.classList.remove('bg-emerald-400', 'animate-pulse'); dot.classList.add('bg-slate-600'); }
+                            if (status) { status.innerText = 'PASİF'; status.classList.remove('text-emerald-400'); status.classList.add('text-slate-500'); }
+                            if (icon) { icon.classList.remove('text-emerald-400'); icon.classList.add('text-slate-500'); }
                         }
                     }
                 });
             }
 
-            // 4. IMAGES
-            if (telemetryMap['IMAGES']) {
-                const imgPaths = telemetryMap['IMAGES'].split(',');
-                const timestamp = new Date().getTime(); // timestamp for cache-busting annotated images
-                
-                imgPaths.forEach((path, idx) => {
-                    if (idx < nozzleCards.length && path) {
-                        const card = nozzleCards[idx];
-                        const imgEl = card.querySelector('.nozzle-cam');
-                        if (imgEl) {
-                            // Using standard localhost URL. The browser will fetch the raw image.
-                            imgEl.src = `http://localhost:8000/ai/${path}`;
-                            imgEl.classList.remove('hidden');
-                        }
-                        
-                        // Upload YOLO Annotated Images
-                        const yoloImg = document.getElementById(`yolo-cam-${idx}`);
-                        if (yoloImg) {
-                            yoloImg.classList.remove('hidden');
-                            yoloImg.src = `http://localhost:8000/ai/dataset/annotated/camera_${idx+1}.jpg?t=${timestamp}`;
-                        }
-                    }
-                });
-            }
 
             // 5. STATS & MODES
             if (telemetryMap['MARKS']) markVal.innerText = telemetryMap['MARKS'];
@@ -472,12 +543,20 @@
                     "px-4 py-1.5 rounded-full text-sm font-semibold bg-slate-800 text-slate-400 border border-slate-700";
             }
             if (telemetryMap['AUTOPILOT']) {
-                const isOn = telemetryMap['AUTOPILOT'].trim().length > 0;
+                const apText = telemetryMap['AUTOPILOT'].trim();
+                const isOn = apText.length > 0;
                 isAutoOn = isOn;
                 autoBadge.innerText = isOn ? 'AUTO: ON' : 'AUTO: OFF';
                 autoBadge.className = isOn ? 
                     "px-4 py-1.5 rounded-full text-sm font-semibold bg-indigo-500/20 text-indigo-400 border border-indigo-500/50" : 
                     "px-4 py-1.5 rounded-full text-sm font-semibold bg-slate-800 text-slate-400 border border-slate-700";
+                // B.1: Otopilot ilerleme göstergesi
+                if (isOn) {
+                    autopilotPanel.classList.remove('hidden');
+                    autopilotStr.innerText = apText;
+                } else {
+                    autopilotPanel.classList.add('hidden');
+                }
             }
         }
 
@@ -491,7 +570,9 @@
         // Manual Command Polling (send slider states every 100ms if manual mode)
         setInterval(() => {
             // "speed,steering,n1,n2,n3,n4"
-            if (!isAutoOn || !isAiOn) {
+            // Sadece Otopilot KAPALIYSA manuel sürüş komutu yolla.
+            // Püskürtme yapay zekaya (AI) emanet olsa bile traktörü biz sürebilmeliyiz.
+            if (!isAutoOn) {
                 sendCmd(`${manualSpeed},${manualSteering},${manualNozzles.join(',')}`);
             }
         }, 100);
@@ -500,6 +581,17 @@
         document.getElementById('btn-ai').addEventListener('click', () => {
             sendCmd(isAiOn ? "AI_OFF" : "AI_ON");
             isAiOn = !isAiOn;
+            
+            // Reload YOLO streams when AI is turned ON to bypass browser timeouts
+            if (isAiOn) {
+                const ts = new Date().getTime();
+                for (let i = 0; i < 4; i++) {
+                    const yoloImg = document.getElementById(`yolo-cam-${i}`);
+                    if (yoloImg && yoloImg.dataset.streamUrl) {
+                        yoloImg.src = `${yoloImg.dataset.streamUrl}?t=${ts}`;
+                    }
+                }
+            }
         });
         document.getElementById('btn-auto').addEventListener('click', () => {
             sendCmd(isAutoOn ? "AUTOPILOT_OFF" : "AUTOPILOT_ON");
@@ -517,7 +609,18 @@
         });
 
         // Initialize connection
-        connectWebSocket();
+        document.addEventListener('DOMContentLoaded', () => {
+            connectWebSocket();
+            
+            // Set YOLO MJPEG stream URLs with cache-busting timestamp
+            const ts = new Date().getTime();
+            for (let i = 0; i < 4; i++) {
+                const yoloImg = document.getElementById(`yolo-cam-${i}`);
+                if (yoloImg && yoloImg.dataset.streamUrl) {
+                    yoloImg.src = `${yoloImg.dataset.streamUrl}?t=${ts}`;
+                }
+            }
+        });
     </script>
 </body>
 </html>

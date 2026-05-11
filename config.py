@@ -7,12 +7,19 @@ All shared constants and settings for the simulation.
 # ── Network ───────────────────────────────────────────────────────────
 SOCKET_HOST = "localhost"
 SOCKET_PORT = 5005
+VIDEO_STREAM_PORT = 5006  # MJPEG stream için RAM üzeri video aktarım portu
 
 # ── Tractor ───────────────────────────────────────────────────────────
 MAX_SPEED = 20.0          # km/h
 MIN_SPEED = -20.0         # km/h (reverse)
 MAX_STEERING = 0.6        # radians
 SPEED_STEP = 0.5          # slider resolution
+
+# Webots direksiyon yönü düzeltmesi:
+# Eğer traktör otonom sürüşte ters yöne gidiyorsa bu değeri değiştirin.
+#  1 = normal (pozitif açı = sola dönüş)
+# -1 = ters   (pozitif açı = sağa dönüş, çoğu Webots Vehicle modeli)
+STEERING_SIGN = -1
 
 # ── Nozzles ───────────────────────────────────────────────────────────
 NUM_NOZZLES = 4
@@ -34,7 +41,7 @@ MARK_COLOR = (0.1, 0.6, 0.9)
 MARK_TRANSPARENCY = 0.3
 
 # ── Status Updates ────────────────────────────────────────────────────
-STATUS_SEND_INTERVAL_MS = 500   # milliseconds between status updates to UI
+STATUS_SEND_INTERVAL_MS = 50    # milliseconds between status updates to UI
 UI_SEND_RATE_HZ = 10            # commands per second from UI
 
 # ── Logging ───────────────────────────────────────────────────────────
@@ -68,8 +75,9 @@ AI_DATASET_PATHS = [
 AI_IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg"]
 
 # Görseller arası otomatik geçiş süresi (milisaniye)
-# 500ms = saniyede 2 görsel
-AI_IMAGE_INTERVAL_MS = 500
+# 100ms = saniyede 10 görsel (Yüksek işlem gücü ister)
+# 333ms = saniyede 3 görsel (Düşük donanımlı bilgisayarlar için kasmayı engeller)
+AI_IMAGE_INTERVAL_MS = 333
 
 # YOLO tahmininin kaç adımda bir çalışacağı (Performans için)
-AI_DETECTION_INTERVAL = 5
+AI_DETECTION_INTERVAL = 1

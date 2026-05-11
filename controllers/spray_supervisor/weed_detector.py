@@ -11,6 +11,8 @@ import cv2
 import glob
 import time
 import numpy as np
+import socket
+import struct
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 if project_root not in sys.path:
@@ -42,11 +44,29 @@ class WeedDetector:
         # Setup dataset loaders
         self.dataset_images = [[] for _ in range(NUM_NOZZLES)]
         self.current_indices = [0] * NUM_NOZZLES
-        self.last_update_times = [0] * NUM_NOZZLES
+        
+        # Stagger initial update times so all 4 YOLO models don't fire in the exact same physics step!
+        # This prevents massive FPS drops (stuttering) by distributing the CPU load across time.
+        current_t = time.time() * 1000
+        stagger_ms = AI_IMAGE_INTERVAL_MS / NUM_NOZZLES
+        self.last_update_times = [current_t + (i * stagger_ms) for i in range(NUM_NOZZLES)]
+        
         self.last_activations = [0.0] * NUM_NOZZLES
         self.last_detected_indices = [-1] * NUM_NOZZLES
         
+        self.video_sock = None
+        self._connect_video_stream()
+        
         self._setup_datasets()
+
+    def _connect_video_stream(self):
+        try:
+            self.video_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.video_sock.connect(("localhost", 5006))
+            logger.info("Video yayın sunucusuna (FastAPI) bağlanıldı.")
+        except Exception as e:
+            logger.warning("Video yayın sunucusuna bağlanılamadı: %s", e)
+            self.video_sock = None
 
     def _setup_datasets(self):
         try:
@@ -116,11 +136,24 @@ class WeedDetector:
                     # Run YOLO detection
                     detections = self.yolo.detect(img_bgr)
                     
-                    # Annotate and save for dashboard presentation
+                    # Annotate and stream for dashboard presentation
                     annotated = self.yolo.draw_detections(img_bgr, detections)
-                    annot_dir = os.path.join(project_root, "ai", "dataset", "annotated")
-                    os.makedirs(annot_dir, exist_ok=True)
-                    cv2.imwrite(os.path.join(annot_dir, f"camera_{i+1}.jpg"), annotated)
+                    
+                    # Stream over TCP to FastAPI instead of saving to disk
+                    success, encoded_img = cv2.imencode('.jpg', annotated, [cv2.IMWRITE_JPEG_QUALITY, 70])
+                    if success:
+                        data = encoded_img.tobytes()
+                        header = struct.pack(">II", i, len(data))
+                        
+                        if not self.video_sock:
+                            self._connect_video_stream()
+                            
+                        if self.video_sock:
+                            try:
+                                self.video_sock.sendall(header + data)
+                            except Exception:
+                                self.video_sock.close()
+                                self.video_sock = None
                     
                     max_confidence = 0.0
                     for det in detections:

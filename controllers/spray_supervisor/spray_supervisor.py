@@ -29,6 +29,7 @@ from config import (
     SPRAY_LIGHT_ON_INTENSITY, SPRAY_LIGHT_OFF_INTENSITY,
     MAX_MARKS, MARK_INTERVAL, MARK_HEIGHT, MARK_SIZE, MARK_COLOR, MARK_TRANSPARENCY,
     STATUS_SEND_INTERVAL_MS,
+    AI_DETECTION_INTERVAL,
     LOG_FORMAT, LOG_LEVEL,
 )
 
@@ -113,7 +114,6 @@ def send_status(tractor_pos):
             detections = weed_detector.total_detections if weed_detector.is_enabled else 0
             stats_str = stats.get_status_string()
             auto_str = autopilot.get_status_string() if autopilot.is_active else ""
-            img_paths = weed_detector.current_image_paths if hasattr(weed_detector, 'current_image_paths') else ["", "", "", ""]
             status = (f"POS:{tractor_pos[0]:.2f},{tractor_pos[1]:.2f},{tractor_pos[2]:.2f}"
                       f"|SPEED:{current_speed:.1f}"
                       f"|STEER:{current_steering:.3f}"
@@ -123,8 +123,7 @@ def send_status(tractor_pos):
                       f"|DETECTIONS:{detections}"
                       f"|STATS:{stats_str}"
                       f"|TANK:{tank_level:.1f}/{TANK_MAX:.1f}"
-                      f"|AUTOPILOT:{auto_str}"
-                      f"|IMAGES:{','.join(img_paths)}\n")
+                      f"|AUTOPILOT:{auto_str}\n")
             client_socket.sendall(status.encode('utf-8'))
         except (BrokenPipeError, ConnectionResetError, OSError):
             pass
@@ -189,7 +188,15 @@ def handle_client():
                     ai_mode = False
                     logger.info("AI modu DEVRE DIŞI")
                 elif line.strip().upper() == 'AUTOPILOT_ON':
-                    autopilot.start()
+                    # Traktörün mevcut pozisyonunu ve bakış yönünü al
+                    if tractor_node:
+                        t_pos = tractor_node.getPosition()
+                        t_rot = tractor_node.getOrientation()
+                        import math as _math
+                        t_heading = _math.atan2(t_rot[3], t_rot[0])
+                        autopilot.start(tractor_pos=t_pos, tractor_heading=t_heading)
+                    else:
+                        autopilot.start()
                     logger.info("Autopilot başlatıldı")
                 elif line.strip().upper() == 'AUTOPILOT_OFF':
                     autopilot.stop()
@@ -485,14 +492,22 @@ while supervisor.step(timestep) != -1:
             except Exception:
                 pass
 
-    from config import AI_DETECTION_INTERVAL
-    
     # ── AI Weed Detection ──
     if ai_mode and weed_detector.is_enabled and step_count % AI_DETECTION_INTERVAL == 0:
         if tank_level > 0.0:
             ai_nozzles = weed_detector.detect()
+            nozzle_changed = False
             for i in range(NUM_NOZZLES):
+                if abs(nozzle_states[i] - ai_nozzles[i]) > 0.01:
+                    nozzle_changed = True
                 nozzle_states[i] = ai_nozzles[i]
+            
+            # Nozzle değiştiğinde telemetriyi BEKLEMEDEN hemen gönder!
+            # Bu sayede VRS paneli, Sunum Modu ile aynı anda tepki verir.
+            if nozzle_changed and tractor_node:
+                tractor_pos = tractor_node.getPosition()
+                send_status(tractor_pos)
+            
             if any(v > 0 for v in ai_nozzles) and step_count % 50 == 0:
                 logger.info("AI tespit: Nozzle durumu = %s", [f"{v:.2f}" for v in ai_nozzles])
         else:
@@ -517,7 +532,7 @@ while supervisor.step(timestep) != -1:
     if autopilot.is_active and tractor_node:
         tractor_pos = tractor_node.getPosition()
         tractor_rot = tractor_node.getOrientation()
-        auto_speed, auto_steering = autopilot.compute(tractor_pos, tractor_rot)
+        auto_speed, auto_steering = autopilot.compute(tractor_pos, tractor_rot, dt=(timestep / 1000.0))
         current_speed = auto_speed
         current_steering = auto_steering
 

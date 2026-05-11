@@ -2,10 +2,12 @@ import asyncio
 import socket
 import logging
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import os
 import json
+import struct
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("DashboardBackend")
@@ -29,6 +31,31 @@ app.mount("/ai", StaticFiles(directory=ai_dir), name="ai")
 # ── Webots TCP Socket Settings ──
 WEBOTS_HOST = "localhost"
 WEBOTS_PORT = 5005
+VIDEO_STREAM_PORT = 5006
+
+# ── Video Streaming State ──
+latest_frames = {i: None for i in range(4)}
+
+async def handle_video_client(reader, writer):
+    logger.info("Video stream source connected.")
+    try:
+        while True:
+            header = await reader.readexactly(8)
+            camera_id, length = struct.unpack('>II', header)
+            frame_data = await reader.readexactly(length)
+            latest_frames[camera_id] = frame_data
+    except asyncio.IncompleteReadError:
+        logger.warning("Video stream source disconnected.")
+    except Exception as e:
+        logger.error(f"Video stream error: {e}")
+    finally:
+        writer.close()
+
+async def start_video_server():
+    server = await asyncio.start_server(handle_video_client, '127.0.0.1', VIDEO_STREAM_PORT)
+    logger.info(f"Video TCP Server listening on port {VIDEO_STREAM_PORT}")
+    async with server:
+        await server.serve_forever()
 
 class ConnectionManager:
     def __init__(self):
@@ -36,6 +63,15 @@ class ConnectionManager:
         self.webots_reader = None
         self.webots_writer = None
         self.webots_connected = False
+        self.latest_telemetry = None
+
+    async def broadcast_loop(self):
+        while True:
+            if self.latest_telemetry and len(self.active_connections) > 0:
+                msg = self.latest_telemetry
+                self.latest_telemetry = None
+                await self.broadcast(json.dumps({"type": "telemetry", "data": msg}))
+            await asyncio.sleep(0.02)  # 50 FPS — VRS nozzle gecikmesini minimuma indirir
 
     async def connect_client(self, websocket: WebSocket):
         await websocket.accept()
@@ -73,8 +109,8 @@ class ConnectionManager:
                         
                     msg = data.decode('utf-8').strip()
                     if msg:
-                        # Broadcast the raw status string to all connected web clients
-                        await self.broadcast(json.dumps({"type": "telemetry", "data": msg}))
+                        # Sadece en güncel telemetriyi kaydet (Eskileri çöpe at, UI gecikmesini engelle)
+                        self.latest_telemetry = msg
                         
             except ConnectionRefusedError:
                 logger.warning("Webots is not running or socket is not open. Retrying in 2 seconds...")
@@ -100,6 +136,22 @@ manager = ConnectionManager()
 async def startup_event():
     # Start the background task to bridge Webots and WebSockets
     asyncio.create_task(manager.connect_to_webots())
+    asyncio.create_task(manager.broadcast_loop())
+    asyncio.create_task(start_video_server())
+
+async def frame_generator(camera_id: int):
+    last_frame = None
+    while True:
+        frame_data = latest_frames.get(camera_id)
+        if frame_data and frame_data != last_frame:
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame_data + b'\r\n')
+            last_frame = frame_data
+        await asyncio.sleep(0.05)
+
+@app.get("/stream/{camera_id}")
+async def video_stream(camera_id: int):
+    return StreamingResponse(frame_generator(camera_id), media_type="multipart/x-mixed-replace; boundary=frame")
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):

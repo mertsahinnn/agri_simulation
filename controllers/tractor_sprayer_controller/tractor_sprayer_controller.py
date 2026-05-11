@@ -36,6 +36,7 @@ else:
     logger.warning("Receiver bulunamadı!")
 
 # ── Set initial driving parameters ────────────────────────────────────
+driver.setGear(1)  # Vitesi 1'e al (Eğer boşta (0) olursa direksiyon döner ama araç gitmez)
 driver.setCruisingSpeed(0.0)
 driver.setSteeringAngle(0.0)
 
